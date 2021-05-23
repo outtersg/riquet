@@ -35,7 +35,7 @@ create table sources
 #define N_NOM nom
 #include ntriggers.sql
 
-insert into sources (nom) values ('Riquet');
+insert into sources (nom) values ('.');
 
 -- Fiches
 create table f
