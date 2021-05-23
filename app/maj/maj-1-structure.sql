@@ -44,9 +44,9 @@ create table f
 	t char(1),
 	num text,
 	nom text,
-	ctime datetime,
-	mtime datetime,
-	dtime datetime,
+	ctime timestamp default current_timestamp,
+	mtime timestamp,
+	dtime timestamp,
 	descr text
 );
 #define N_TYPE 'f'
@@ -60,5 +60,5 @@ create table notes
 	id AUTOPRIMARY,
 	id_n integer not null,
 	id_auteur integer,
-	ctime datetime
+	ctime timestamp default current_timestamp
 );
