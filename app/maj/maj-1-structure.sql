@@ -20,7 +20,9 @@ create table l
 	a integer, -- Point A / départ / de / fils
 	b integer, -- Point B / arrivée / vers / père
 	t char(1), -- Type
-	n float    -- Poids; chaque type peut avoir sa façon de gérer n (par exemple, ce peut être considéré comme une distance pour un type, comme une importance pour un autre).
+	n float,   -- Poids; chaque type peut avoir sa façon de gérer n (par exemple, ce peut être considéré comme une distance pour un type, comme une importance pour un autre).
+	c timestamp default current_timestamp, -- Création / début
+	d timestamp                            -- Destruction / fin. Si null: ayant cours
 );
 
 create table sources
