@@ -76,7 +76,7 @@ class ServiceNowApi
 		$champs = isset($champs) ? '&sysparm_fields='.implode(',', array_keys($champs)) : '';
 		// Avantage du CSV: il est accessible à n'importe quel utilisateur qui peut se connecter, sans nécessité de droit à l'API REST ou SOAP.
 		// Inconvénient: il lui manque quelques petites subtilités (ex.: dates ISO).
-		$r = $this->_n->aller($this->_racine.'/'.$table.'_list.do?CSV'.$filtre.$champs);
+		$r = $this->_n->aller($this->_racine.'/'.$table.'_list.do?CSV'.$filtre.$champs.'&sysparm_orderby=number');
 		if($r == '' && !isset($this->_auth))
 		{
 			$this->auth();
