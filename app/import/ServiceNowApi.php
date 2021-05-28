@@ -2,7 +2,7 @@
 
 require_once __DIR__.'/../../vendor/gui/util/navigateur.inc';
 
-class SN
+class ServiceNowApi
 {
 	public function __construct($url, $cache = null)
 	{
