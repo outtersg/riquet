@@ -44,12 +44,13 @@ create table f
 (
 	id ID_N,
 	t char(1),
-	num text,
+	num varchar(255),
 	nom text,
 	ctime timestamp default current_timestamp,
 	mtime timestamp,
 	dtime timestamp,
-	descr text
+	descr text,
+	id_ext text -- Identifiant dans la source, si différent de num (ex.: URL REST).
 );
 #define N_TYPE 'f'
 #define N_TABLE f
