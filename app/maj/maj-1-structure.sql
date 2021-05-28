@@ -17,8 +17,8 @@ create table n
 -- Liens
 create table l
 (
-	p integer, -- Père
-	f integer, -- Fils
+	a integer, -- Point A / départ / de / fils
+	b integer, -- Point B / arrivée / vers / père
 	t char(1), -- Type
 	n float    -- Poids; chaque type peut avoir sa façon de gérer n (par exemple, ce peut être considéré comme une distance pour un type, comme une importance pour un autre).
 );
