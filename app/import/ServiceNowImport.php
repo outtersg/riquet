@@ -115,6 +115,13 @@ class ServiceNowImport extends Import
 	
 	protected function _retraiter(& $l)
 	{
+		if($l['state'] == 'Clos' && $l['closed_at'] == '')
+			$l['closed_at'] = $l['resolved_at'];
+		
+		return array
+		(
+			't' => $this->_typeFiche,
+		);
 	}
 }
 
