@@ -11,8 +11,26 @@ class ServiceNowImport extends Import
 	
 	protected $_typeFiche = 't'; // Tâche.
 	
+	public function champsCsvSql()
+	{
+		return ServiceNow::$CSV;
+	}
+	
+	/**
+	 * Retourne, parmi une liste de colonnes CSV issues de ServiceNow, celle à choisir pour identifiant unique.
+	 */
+	public function colId($colonnes)
+	{
+		foreach(array('number', 'sys_id') as $colCsv)
+			if(array_key_exists($colCsv, $colonnes))
+				return $colCsv;
+		throw new Exception('Aucune colonne ID n\'est trouvable dans le CSV');
+	}
+	
 	public function pondre($csv)
 	{
+		$CSVSQL = $this->champsCsvSql();
+		
 		for($passe = -1; ++$passe < 3;)
 		{
 			$f = fopen($csv, 'rb');
@@ -23,18 +41,14 @@ class ServiceNowImport extends Import
 			switch($passe)
 			{
 				case ServiceNowImport::PASSE_ID:
-					$colcs = array_intersect_key(array_flip($corr), ServiceNow::$CSV); // Les colonnes qui nous intéressent.
-					// La première configurée sera par convention celle d'ID.
-					foreach(ServiceNow::$CSV as $colId => $champId)
-						if(isset($colcs[$colId]))
-						{
-							$numColId = $colcs[$colId];
-							break;
-						}
+					$colcs = array_intersect_key(array_flip($corr), $CSVSQL); // Les colonnes qui nous intéressent.
+					$colId = $this->colId($colcs);
+					$numColId = $colcs[$colId];
+					$champId = $CSVSQL[$colId];
 					
 					$àGarderChamps = $àGarderLiens = array();
 					foreach($colcs as $colc => $rien)
-						switch(substr($cols = ServiceNow::$CSV[$colc], 0, 1))
+						switch(substr($cols = $CSVSQL[$colc], 0, 1))
 						{
 							case '': break; // Ne fera pas son chemin jusqu'au SQL (en tout cas pas directement, servira sans doute dans _retraiter()).
 							case '@': $àGarderLiens[$colc] = substr($cols, 1); break;
