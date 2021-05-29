@@ -43,7 +43,7 @@ insert into sources (nom) values ('.');
 create table f
 (
 	id ID_N,
-	t char(1),
+	t char(63),
 	num varchar(255),
 	nom text,
 	ctime timestamp default current_timestamp,
