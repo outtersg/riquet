@@ -1,7 +1,14 @@
 <?php
 
+require_once dirname(__FILE__).'/../Sql.php';
+
 class Import
 {
+	public function __construct()
+	{
+		$this->sql = new Sql();
+	}
+	
 	protected function _pondreFiche($l)
 	{
 		foreach($l as $c => & $v)
