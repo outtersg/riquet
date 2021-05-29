@@ -13,8 +13,8 @@ class ServiceNow
 		 */
 		'number'                     => 'num',
 		'sys_id'                     => 'id_ext',
-		//'sys_created_on'             => 'ctime',
-		'opened_at'                  => 'ctime',
+		'sys_created_on'             => null,
+		'opened_at'                  => 'ctime', // Utilisé de préférence à sys_created_on (car reflétant son heure de déclaration alors que sys_created_on donne l'heure d'arrivée dans ServiceNow, qui peut différer si la décl a eu lieu dans un autre système puis a été importée dans ServiceNow).
 		'closed_at'                  => 'dtime',
 		'short_description'          => 'nom',
 		'parent'                     => '@^', // Parent
