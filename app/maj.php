@@ -1,11 +1,13 @@
 <?php
 
-require_once dirname(__FILE__).'/../vendor/gui/majeur/Majeur.php';
-require_once dirname(__FILE__).'/../vendor/gui/majeur/MajeurSiloPdo.php';
-require_once dirname(__FILE__).'/../vendor/gui/majeur/MajeurListeurDossiers.php';
-require_once dirname(__FILE__).'/../vendor/gui/majeur/MajeurJoueurPdo.php';
+define('R', dirname(dirname(__FILE__)));
 
-require_once dirname(__FILE__).'/app.php';
+require_once R.'/vendor/gui/majeur/Majeur.php';
+require_once R.'/vendor/gui/majeur/MajeurSiloPdo.php';
+require_once R.'/vendor/gui/majeur/MajeurListeurDossiers.php';
+require_once R.'/vendor/gui/majeur/MajeurJoueurPdo.php';
+
+require_once R.'/app/app.php';
 
 class MajeurRiquet extends Majeur
 {
