@@ -91,7 +91,7 @@ class ServiceNowImport extends Import
 						}
 						break;
 					case ServiceNowImport::PASSE_L:
-						break;
+						break 2; // En fait pas besoin de lire pour cette passe.
 				}
 			}
 			
