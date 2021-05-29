@@ -95,17 +95,6 @@ class ServiceNowImport extends Import
 				}
 			}
 			
-			switch($passe)
-			{
-				case ServiceNowImport::PASSE_ID:
-					// À FAIRE: en mode update, on aura besoin de lister ceux des ID déjà en base (et basculant donc en update plutôt qu'insert à la passe suivante).
-					break;
-				case ServiceNowImport::PASSE_F:
-					break;
-				case ServiceNowImport::PASSE_L:
-					break;
-			}
-			
 			fclose($f);
 		}
 	}
