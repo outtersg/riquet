@@ -3,6 +3,8 @@
 error_reporting(-1);
 ini_set('display_errors', 1);
 
+define('R', dirname(dirname(__FILE__)));
+
 class App
 {
 	public function __construct()
