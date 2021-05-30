@@ -1,0 +1,32 @@
+#!/bin/sh
+
+DelieS() { local s2 ; while [ -h "$s" ] ; do s2="`readlink "$s"`" ; case "$s2" in [^/]*) s2="`dirname "$s"`/$s2" ;; esac ; s="$s2" ; done ; } ; SCRIPTS() { local s="`command -v "$0"`" ; [ -x "$s" -o ! -x "$0" ] || s="$0" ; case "$s" in */bin/*sh) case "`basename "$s"`" in *.*) true ;; *sh) s="$1" ;; esac ;; esac ; case "$s" in [^/]*) local d="`dirname "$s"`" ; s="`cd "$d" ; pwd`/`basename "$s"`" ;; esac ; DelieS ; s="`dirname "$s"`" ; DelieS ; SCRIPTS="$s" ; } ; SCRIPTS
+
+R="`dirname "$SCRIPTS"`"
+VAR="$R/var"
+BDD="$VAR/riquet.sqlite3"
+
+titre()
+{
+	echo "[90m=== $* ===[0m" >&2
+}
+
+init()
+{
+	local f
+	for f in "$SCRIPTS"/actu.*.sh
+	do
+		. "$f"
+		init "$@"
+	done
+}
+
+incr()
+{
+	false # À FAIRE
+}
+
+case "$1" in
+	--init) init "$@" ;;
+	*) incr "$@" ;;
+esac
