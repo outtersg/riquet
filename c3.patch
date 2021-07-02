@@ -1,0 +1,11 @@
+--- c3.js	2021-06-02 06:01:50.304050000 +0200
++++ c3.js	2021-06-02 06:01:01.205354000 +0200
+@@ -90,7 +90,7 @@
+           return d;
+         };
+       }
+-      if (typeof crossfilter !== "undefined" && crossfilter !== null) {
++      if (typeof crossfilter !== "undefined" && crossfilter !== null && typeof crossfilter.quicksort != 'undefined') {
+         crossfilter.quicksort.by(accessor)(arr, 0, arr.length);
+         return arr;
+       } else {

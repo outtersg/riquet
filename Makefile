@@ -1,6 +1,7 @@
 crossfilter_version=1.5.4
 # Dernière version avec quicksort (utilisé par c3):
-crossfilter_version=1.4.8
+#crossfilter_version=1.4.8
+# … Mais grâce à notre c3.patch on va pouvoir monter en version.
 # Ne pas confondre c3 de C3JS et c3 de drarmstr:
 c3_version=0.7.20 # C3JS
 c3_version=0.1.6 # drarmstr
@@ -44,6 +45,7 @@ www/lib/c3: www/lib/c3-$(c3_version)
 www/lib/c3-$(c3_version): /tmp/c3-$(c3_version).tgz
 	cd /tmp/ && tar xzf $<
 	mv /tmp/c3-$(c3_version)/js $@
+	cat c3.patch | ( cd $@ && patch -p0 )
 	touch $@
 
 /tmp/c3-$(c3_version).tgz:
