@@ -10,7 +10,7 @@ init()
 	find "$csv" -mmin -120 2> /dev/null | grep -q . || \
 	{
 		titre "Téléchargement des ServiceNow"
-		time php "$SCRIPTS/servicenowtelech.php" --init > "$csv" || rm -f "$csv"
+		time php "$SCRIPTS/servicenowtelech.php" --init > "$csv" || { rm -f "$csv" ; return 1 ; }
 	}
 	
 	titre "Conversion CSV -> SQL"
