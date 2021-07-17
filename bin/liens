@@ -12,12 +12,24 @@ analyserParametres()
 	while [ $# -gt 0 ]
 	do
 		case "$1" in
-			-t) cols="$cols||' '||nom" ;;
-			/) where="desc regexp '$2' or comm regexp '$2'" ; shift ;;
-			*) where="num in ('`echo "$*" | sed -e "s/ /','/g"`')" ;;
+			-t) cols="$cols||' '||f.nom" ;;
+			/) where="f.desc regexp '$2' or f.comm regexp '$2'" ; shift ;;
+			*) where="f.num in ('`echo "$*" | sed -e "s/ /','/g"`')" ;;
 		esac
 		shift
 	done
+	
+	# A-t-on des états indiquant qu'une fiche est close?
+	
+	metato=
+	metatf=
+	etats=
+	if php -r "require '$R/etc/riquet.php'; exit(is_array(\$config['terminaux']) ? 0 : 1);"
+	then
+		metato="case when l.b is null then '' else '-' end||"
+		metatf="||case when l.b is null then '' else '-' end"
+		etats="left join (l join f e on e.id = l.b and e.nom in (`param --sql terminaux`)) on l.a = f.id and l.t = 'e'"
+	fi
 }
 
 param()
@@ -38,4 +50,10 @@ param()
 }
 
 analyserParametres "$@"
-sqlite3 "$BDD" "select '['||num||'|`param servicenow`/incident.do?sys_id='||id_ext||']'$cols from f where $where order by num desc;"
+sqlite3 "$BDD" \
+"
+	select $metato'['||f.num||'|`param servicenow`/incident.do?sys_id='||f.id_ext||']'$metatf$cols
+	from f
+	$etats
+	where $where order by f.num desc;
+"
