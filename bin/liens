@@ -8,10 +8,11 @@ BDD="$VAR/riquet.sqlite3"
 
 analyserParametres()
 {
-	where=
+	where= cols=
 	while [ $# -gt 0 ]
 	do
 		case "$1" in
+			-t) cols="$cols||' '||nom" ;;
 			/) where="desc regexp '$2' or comm regexp '$2'" ; shift ;;
 			*) where="num in ('`echo "$*" | sed -e "s/ /','/g"`')" ;;
 		esac
@@ -25,4 +26,4 @@ param()
 }
 
 analyserParametres "$@"
-sqlite3 "$BDD" "select '['||num||'|`param servicenow`/incident.do?sys_id='||id_ext||']' from f where $where order by num desc;"
+sqlite3 "$BDD" "select '['||num||'|`param servicenow`/incident.do?sys_id='||id_ext||']'$cols from f where $where order by num desc;"
