@@ -9,7 +9,7 @@ class ServiceNowApi
 		$this->_racine = $url;
 		
 		$this->_n = 
-			isset($cache) && file_exists($cache) // && ($infos = stat($cache)) && $infos['mtime'] >= time() - 2 * 3600
+			isset($cache) && file_exists($cache) && ($infos = stat($cache)) && $infos['mtime'] >= time() - 2 * 3600
 			? unserialize(file_get_contents($cache))
 			: null;
 		if(!$this->_n)
