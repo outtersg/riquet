@@ -2,16 +2,21 @@
 
 require_once dirname(__FILE__).'/../app/app.php';
 require_once R.'/app/import/ServiceNowApi.php';
+require_once R.'/app/import/ServiceNowImport.php';
 
 $app = new App();
 $classe = $app->classe('ServiceNowApi');
 fprintf(STDERR, "Extraction via la classe %s\n", $classe);
 
 $sn = new $classe($app->config['servicenow'], '/tmp/sn.php.cache');
-if(isset($argv[1]) && $argv[1] == '--init')
-	$csv = $sn->tout();
-else
-	$csv = $sn->actuel();
+	$méthode = 'actuel';
+	for($num = 0; ++$num < count($argv);)
+		switch($argv[$num])
+		{
+			case '--init': $méthode = 'tout'; break;
+			case '--comm': $sn->mode = ServiceNowImport::ENS_DESC|ServiceNowImport::ENS_COMM; break;
+		}
+		$csv = $sn->$méthode();
 
 // sysparm_display_value=all, displayvalue=all n'ont pas d'effet sur state.
 // Mais en allant voir https://www.snow-mirror.com/introduction-to-display-values/ on déniche u_state qui nous intéresse.
