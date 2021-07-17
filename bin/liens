@@ -22,7 +22,19 @@ analyserParametres()
 
 param()
 {
-	php -r "require '$R/etc/riquet.php'; echo \$config['$1'];"
+	local sql=0
+	if [ "x$1" = x--sql ] ; then sql=1 ; shift ; fi
+	php -r \
+	"
+		require '$R/etc/riquet.php';
+		\$t = \$config['$1'];
+		is_array(\$t) || \$t = array(\$t);
+		function sql(\$c)
+		{
+			return \"'\".strtr(\$c, array(\"'\" => \"''\")).\"'\";
+		}
+		echo implode(',', $sql ? array_map('sql', \$t) : \$t);
+	"
 }
 
 analyserParametres "$@"
