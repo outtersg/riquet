@@ -9,7 +9,12 @@ class ServiceNowImport extends Import
 	const PASSE_F = 1;
 	const PASSE_L = 2;
 	
+	const ENS_INFO = 1;
+	const ENS_DESC = 2;
+	const ENS_COMM = 4;
+	
 	protected $_typeFiche = 't'; // Tâche.
+	public $mode = ServiceNowImport::ENS_INFO;
 	
 	public function champsCsvSql()
 	{
