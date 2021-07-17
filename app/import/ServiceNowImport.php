@@ -37,6 +37,13 @@ class ServiceNowImport extends Import
 		throw new Exception('Aucune colonne ID n\'est trouvable dans le CSV');
 	}
 	
+	protected function _modeEnTêtes($enTêtes)
+	{
+		if(!isset($enTêtes['state'])) $this->mode ^= ServiceNowImport::ENS_INFO;
+		if(isset($enTêtes['description'])) $this->mode |= ServiceNowImport::ENS_DESC;
+		if(isset($enTêtes['comments_and_work_notes'])) $this->mode |= ServiceNowImport::ENS_COMM;
+	}
+	
 	public function pondre($csv)
 	{
 		$CSVSQL = $this->champsCsvSql();
