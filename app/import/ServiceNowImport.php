@@ -46,8 +46,6 @@ class ServiceNowImport extends Import
 	
 	public function pondre($csv)
 	{
-		$CSVSQL = $this->champsCsvSql();
-		
 		for($passe = -1; ++$passe < 3;)
 		{
 			$f = fopen($csv, 'rb');
@@ -58,7 +56,10 @@ class ServiceNowImport extends Import
 			switch($passe)
 			{
 				case ServiceNowImport::PASSE_ID:
-					$colcs = array_intersect_key(array_flip($corr), $CSVSQL); // Les colonnes qui nous intéressent.
+					$corri = array_flip($corr);
+					$this->_modeEnTêtes($corri);
+					$CSVSQL = $this->champsCsvSql();
+					$colcs = array_intersect_key($corri, $CSVSQL); // Les colonnes qui nous intéressent.
 					$colId = $this->colId($colcs);
 					$numColId = $colcs[$colId];
 					$champId = $CSVSQL[$colId];
