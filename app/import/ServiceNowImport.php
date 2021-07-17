@@ -18,7 +18,12 @@ class ServiceNowImport extends Import
 	
 	public function champsCsvSql()
 	{
-		return ServiceNow::$CSV;
+		$r = ServiceNow::$CSV;
+		if(!($this->mode & ServiceNowImport::ENS_INFO)) $r = array_intersect_key($r, array('number' => 1, 'sys_id' => 1));
+		if($this->mode & ServiceNowImport::ENS_DESC) $r += array('description' => 'desc');
+		if($this->mode & ServiceNowImport::ENS_COMM) $r += array('comments_and_work_notes' => 'comm');
+		
+		return $r;
 	}
 	
 	/**
