@@ -17,12 +17,15 @@ class Import
 		$this->sql = new Sql();
 	}
 	
-	protected function _pondreFiche($l)
+	protected function _pondreFiche($l, $champ = null, $id = null)
 	{
 		foreach($l as $c => & $v)
 			$v = $this->formaterSql($c, $v);
 		// À FAIRE: update si déjà présent (pour conserver des liens qui auraient été mis manuellement, hors source, et qui sautent donc si l'on réimporte par effacement puis import total).
+		if($id === null && (!$champ || !isset($l[$champ])))
 		$req = $this->_insert($l);
+		else
+			$req = $this->_update($l, $champ, $id);
 		
 		echo $req;
 	}
@@ -81,6 +84,16 @@ insert into f ($champ, t) select t.* from t_f t left join f on (f.t = t.t and f.
 	protected function _insert($l)
 	{
 		return "insert into f (".implode(", ", array_keys($l)).") values (".implode(", ", $l).");\n";
+	}
+	
+	protected function _update($l, $champ, $id = null)
+	{
+		if(!isset($id)) $id = $l[$champ];
+		unset($l[$champ]);
+		foreach($l as $c => & $v)
+			$v = "$c = $v";
+		$vs = implode(', ', $l);
+		return "update f set $vs where $champ = $id;\n";
 	}
 	
 	public function formaterSql($c, $v)
