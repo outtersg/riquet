@@ -12,6 +12,7 @@ analyserParametres()
 	while [ $# -gt 0 ]
 	do
 		case "$1" in
+			/) where="desc regexp '$2' or comm regexp '$2'" ; shift ;;
 			*) where="num in ('`echo "$*" | sed -e "s/ /','/g"`')" ;;
 		esac
 		shift
