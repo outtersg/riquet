@@ -8,6 +8,8 @@ class ServiceNowImport extends Import
 	const PASSE_ID = 0;
 	const PASSE_F = 1;
 	const PASSE_L = 2;
+	const PASSE_COMM = 3;
+	const N_PASSES = 4;
 	
 	const ENS_INFO = 1;
 	const ENS_DESC = 2;
@@ -46,7 +48,7 @@ class ServiceNowImport extends Import
 	
 	public function pondre($csv)
 	{
-		for($passe = -1; ++$passe < 3;)
+		for($passe = -1; ++$passe < ServiceNowImport::N_PASSES;)
 		{
 			$f = fopen($csv, 'rb');
 			
@@ -80,6 +82,7 @@ class ServiceNowImport extends Import
 					$liens = array();
 					break;
 				case ServiceNowImport::PASSE_L:
+					if(!($this->mode & ServiceNowImport::ENS_INFO)) break;
 					$this->_pondreSupprLiens('', $champId, array_keys($ids), $àGarderLiens);
 					foreach($liens as $typeLien => $cibles)
 					{
@@ -97,6 +100,7 @@ class ServiceNowImport extends Import
 			}
 			
 			// Lecture du contenu.
+			if(($this->mode & ServiceNowImport::ENS_INFO) || ($passe != ServiceNowImport::PASSE_F))
 			while(($l = fgetcsv($f, 0, ',', '"', "\000"))) // Caractère d'échappemement: on ne veut que le "" par défaut, surtout pas le \ (car certains incidents se terminent par un chemin Windows clos par un \ juste avant le " CSV).
 			{
 				switch($passe)
@@ -124,6 +128,15 @@ class ServiceNowImport extends Import
 						break;
 					case ServiceNowImport::PASSE_L:
 						break 2; // En fait pas besoin de lire pour cette passe.
+				case ServiceNowImport::PASSE_COMM:
+					if(!($this->mode & (ServiceNowImport::ENS_DESC|ServiceNowImport::ENS_COMM))) break;
+					$l = array_combine($corr, $l);
+					$l = array_combine($àGarderChamps, array_intersect_key($l, $àGarderChamps)); // Champs CSV -> champs SQL.
+					$this->_pondreFiche($l, 'id_ext');
+					// À FAIRE: découper sur les dates.
+					// À FAIRE: repérer l'auteur.
+					// À FAIRE: simple remplacement si on détecte un commentaire même fiche même date.
+					break;
 				}
 			}
 			
