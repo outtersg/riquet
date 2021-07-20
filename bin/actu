@@ -23,7 +23,12 @@ init()
 
 incr()
 {
-	false # À FAIRE
+	local f
+	for f in "$SCRIPTS"/actu.*.sh
+	do
+		. "$f"
+		incr "$@"
+	done
 }
 
 case "$1" in
