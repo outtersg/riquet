@@ -40,4 +40,7 @@ _actu()
 	
 	titre "Intégration des ServiceNow à la base"
 	time sqlite3 "$BDD" < "$sql"
+	# Optimisations possibles:
+	# https://news.ycombinator.com/item?id=27872575
+	# Les pragma, pousser vers une base :memory: puis la mettre en fichier, etc.
 }
