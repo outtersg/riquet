@@ -4,8 +4,9 @@ init()
 	
 	titre "[[[ IMPORT SERVICENOW ]]]"
 	
-	local csv="$VAR/init.servicenow.csv"
-	local sql="$VAR/init.servicenow.sql"
+	local suf=""
+	local csv="$VAR/init.servicenow$suf.csv"
+	local sql="$VAR/init.servicenow$suf.sql"
 	
 	find "$csv" -mmin -120 2> /dev/null | grep -q . || \
 	{
