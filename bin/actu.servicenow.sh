@@ -9,14 +9,25 @@ _actu()
 	
 	titre "[[[ IMPORT SERVICENOW ]]]"
 	
-	local suf=""
+	local suf= opttelech=
+	
+	while [ $# -gt 0 ]
+	do
+		case "$1" in
+			--init)
+				opttelech="$opttelech --init"
+				;;
+		esac
+		shift
+	done
+	
 	local csv="$VAR/init.servicenow$suf.csv"
 	local sql="$VAR/init.servicenow$suf.sql"
 	
 	find "$csv" -mmin -120 2> /dev/null | grep -q . || \
 	{
 		titre "Téléchargement des ServiceNow"
-		time php "$SCRIPTS/servicenowtelech.php" --init > "$csv" || { rm -f "$csv" ; return 1 ; }
+		time php "$SCRIPTS/servicenowtelech.php" $opttelech > "$csv" || { rm -f "$csv" ; return 1 ; }
 	}
 	
 	titre "Conversion CSV -> SQL"
