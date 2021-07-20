@@ -26,12 +26,7 @@ _actu()
 	local csv="$VAR/init.servicenow$suf.csv"
 	local sql="$VAR/init.servicenow$suf.sql"
 	
-	[ -z "$temp" ] || rm -f "$csv"
-	find "$csv" -mmin -120 2> /dev/null | grep -q . || \
-	{
-		titre "Téléchargement des ServiceNow"
-		time php "$SCRIPTS/servicenowtelech.php" $opttelech > "$csv" || { rm -f "$csv" ; return 1 ; }
-	}
+	_telecache "$csv" 120 $opttelech || return 1
 	
 	titre "Conversion CSV -> SQL"
 	rm -f "$BDD"
@@ -43,4 +38,16 @@ _actu()
 	# Optimisations possibles:
 	# https://news.ycombinator.com/item?id=27872575
 	# Les pragma, pousser vers une base :memory: puis la mettre en fichier, etc.
+}
+
+_telecache()
+{
+	local csv="$1" persis="$2"
+	shift ; shift
+	
+	find "$csv" -mmin -$persis 2> /dev/null | grep -q . || \
+	{
+		titre "Téléchargement des ServiceNow $*"
+		time php "$SCRIPTS/servicenowtelech.php" $* > "$csv" || { rm -f "$csv" ; return 1 ; }
+	}
 }
