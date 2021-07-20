@@ -19,6 +19,15 @@ class ServiceNowApi
 		$this->_auth = null;
 	}
 	
+	public function tout()
+	{
+		$snic = $GLOBALS['app']->classe('ServiceNowImport');
+		$sImport = new $snic();
+		if(isset($this->mode)) $sImport->mode = $this->mode;
+		$champs = $sImport->champsCsvSql();
+		return $this->csv('incident', $champs, $this->filtre);
+	}
+	
 	public function auth()
 	{
 		/* À FAIRE: cette authentification est spécifique à un SSO par CAS. Généraliser. */
