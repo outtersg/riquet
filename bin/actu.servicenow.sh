@@ -9,7 +9,7 @@ _actu()
 	
 	titre "[[[ IMPORT SERVICENOW ]]]"
 	
-	local suf= opttelech= temp=1
+	local suf= opttelech= temp=1 comm=
 	
 	while [ $# -gt 0 ]
 	do
@@ -17,6 +17,9 @@ _actu()
 			--init)
 				opttelech="$opttelech --init"
 				temp=
+				;;
+			--comm)
+				comm=1
 				;;
 		esac
 		shift
@@ -27,11 +30,13 @@ _actu()
 	local sql="$VAR/init.servicenow$suf.sql"
 	
 	_telecache "$csv" 120 $opttelech || return 1
+	[ -z "$comm" ] || _telecache "$csv.comm" 0 $opttelech --comm || return 1
 	
 	titre "Conversion CSV -> SQL"
 	[ -n "$temp" ] || rm -f "$BDD" # /!\ On bute la base en mode --init. Pas sympa si d'autres sources que nous ont alimenté. # À FAIRE: un simple delete de tout ce qui est à nous.
 	php "$SCRIPTS/../app/maj.php"
 	php "$SCRIPTS/servicenowactu.php" "$csv" > "$sql"
+	[ -z "$comm" ] || php "$SCRIPTS/servicenowactu.php" "$csv.comm" >> "$sql"
 	
 	titre "Intégration des ServiceNow à la base"
 	time sqlite3 "$BDD" < "$sql"
