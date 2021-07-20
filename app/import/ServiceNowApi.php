@@ -28,6 +28,16 @@ class ServiceNowApi
 		return $this->csv('incident', $champs, $this->filtre);
 	}
 	
+    // À FAIRE: changements d'affectataire. Là si un élément a disparu de notre radar (est échu à quelqu'un d'autre), nos filtres ne le renverront pas et donc il restera éternellement à l'état "chez nous" (sauf à effacer la base et faire un tout()).
+	public function actuel()
+	{
+		$nJours = 7;
+		$this->filtre[] = 'sys_updated_on';
+		$this->filtre[] = '>=';
+		$this->filtre[] = strftime('%FT%T', time() - 3600 * 24 * $nJours);
+		return $this->tout();
+	}
+	
 	public function auth()
 	{
 		/* À FAIRE: cette authentification est spécifique à un SSO par CAS. Généraliser. */
