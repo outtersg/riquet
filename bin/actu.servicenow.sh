@@ -21,7 +21,7 @@ _actu()
 		esac
 		shift
 	done
-	[ -z "$temp" ] || suf="$suff.temp"
+	[ -z "$temp" ] || suf="$suf.temp"
 	
 	local csv="$VAR/init.servicenow$suf.csv"
 	local sql="$VAR/init.servicenow$suf.sql"
