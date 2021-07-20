@@ -3,6 +3,11 @@ init()
 	_actu --init "$@"
 }
 
+incr()
+{
+	_actu "$@"
+}
+
 _actu()
 {
 	grep -q servicenow "$R/etc/riquet.php" || return 0
