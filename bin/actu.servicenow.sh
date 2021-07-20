@@ -1,5 +1,10 @@
 init()
 {
+	_actu --init "$@"
+}
+
+_actu()
+{
 	grep -q servicenow "$R/etc/riquet.php" || return 0
 	
 	titre "[[[ IMPORT SERVICENOW ]]]"
