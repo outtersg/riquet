@@ -79,6 +79,9 @@ class ServiceNowImport extends Import
 					break;
 				case ServiceNowImport::PASSE_F:
 					// À FAIRE: en mode update, on aura besoin de lister ceux des ID déjà en base (et basculant donc en update plutôt qu'insert à la passe suivante).
+					// Pour le moment on fait le ménage:
+					if($this->mode & ServiceNowImport::ENS_INFO)
+						echo $this->sql->req("delete from f where $champId in (%s);\n", array_keys($ids)); // À FAIRE: s'assurer que nous en sommes la source.
 					$liens = array();
 					break;
 				case ServiceNowImport::PASSE_L:
