@@ -36,9 +36,30 @@ class Liens
 		$this->app = $app;
 	}
 	
-	public function aff($idsOuRech, $mode)
+	public function pavide($x)
 	{
-		$req = $this->req($idsOuRech, $mode);
+		return $x && $x != 'null';
+	}
+	
+	public function aff($params, $mode)
+	{
+		/* Interprétation des paramètres ($_GET ou $argv). */
+		
+		$nums = array();
+		$textes = array();
+		if(isset($params['num']))
+			foreach(is_array($params['num']) ? $params['num'] : array($params['num']) as $num)
+				$nums = array_merge($nums, array_filter(array_map('trim', explode(',', $num)), array($this, 'pavide')));
+		if(isset($params['q']))
+		{
+			$p = $params['q'];
+			if(!is_array($p)) $p = array($p);
+			$textes = array_merge($textes, $p);
+		}
+		
+		/* Requête! */
+		
+		$req = $this->req($nums, $textes, $mode);
 		return implode("\n", $this->app->bdd->query($req)->fetchAll(PDO::FETCH_COLUMN));
 	}
 	
@@ -47,15 +68,19 @@ class Liens
 		return "'".strtr($c, array("'" => "''"))."'";
 	}
 	
-	public function req($idsOuRech, $mode)
+	public function req($nums, $textes, $mode)
 	{
 		$where = '';
 		$cols = '';
 		if($mode & Liens::NOM) $cols .= "' '||f.nom";
-		$where = is_array($idsOuRech)
-			? "f.num in ('".implode("','", $idsOuRech)."')"
-			: "f.desc regexp '$idsOuRech' or f.comm regexp '$idsOuRech'"
-		;
+		$where = array();
+		if(!empty($nums))
+			$where[] = "f.num in ('".implode("','", $nums)."')";
+		if(!empty($textes))
+			foreach($textes as $texte)
+				$where[] = "f.desc regexp '$texte' or f.comm regexp '$texte'";
+		if(empty($where)) return;
+		$where = implode(' or ', $where);
 		
 		// A-t-on des états indiquant qu'une fiche est close?
 	
@@ -98,6 +123,6 @@ class Liens
 $app = new App();
 $l = new Liens($app);
 if(isset($_GET))
-	echo $l->aff($_GET['q'], Liens::HTML|Liens::NOM)."\n";
+	echo $l->aff($_GET, Liens::HTML|Liens::NOM)."\n";
 
 ?>
