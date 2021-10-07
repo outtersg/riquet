@@ -1,0 +1,15 @@
+#!/usr/bin/env php
+<?php
+
+require dirname(__FILE__).'/../etc/riquet.php';
+if(($sql = $argv[1] == '--sql'))
+	array_shift($argv);
+$t = $config[$argv[1]];
+is_array($t) || $t = array($t);
+function sql($c)
+{
+	return "'".strtr($c, array("'" => "''"))."'";
+}
+echo implode(',', $sql ? array_map('sql', $t) : $t);
+
+?>
