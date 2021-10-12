@@ -108,6 +108,10 @@ class ServiceNowApi
 			}
 		}
 		$page = $n->allerEtTrouver($this->_racine.'/navpage.do', $lard, 'moi', "/NOW.user.name = '(.*)'/");
+		if(!$page)
+			throw new Exception("Authentification échouée, impossible de retrouver notre nom dans la page.");
+		else
+			fprintf(STDERR, "[32mBienvenue %s![0m\n", $page);
 		
 		if(isset($this->_cache))
 			file_put_contents($this->_cache, serialize($this->_n));
