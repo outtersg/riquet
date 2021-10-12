@@ -38,6 +38,9 @@ class ServiceNowApi
 		return $this->tout();
 	}
 	
+	const INTERNE = 'interne';
+	const SSO = 'SSO';
+	
 	public function auth()
 	{
 		/* À FAIRE: cette authentification est spécifique à un SSO par CAS. Généraliser. */
@@ -47,7 +50,11 @@ class ServiceNowApi
 		$n = $this->_n;
 		
 		//$n->aller($this->_racine.$urlDeDéconnexionSSO);
+		// A-t-on une redirection type SSO?
 		$suite = $n->allerEtTrouver($this->_racine, null, 'redirection', "/(?:top.location.href *= *|top.location.replace *\()'([^']*)'/");
+		$lard = null; // Le paquet de viandasse qu'on devra pousser à la page cible pour lui signifier par exemple le jeton du SSO.
+		if($suite)
+		{
 		$pAuth = $n->aller($suite, null);
 		
 		// Soit on est redirigé vers la mire d'authentification, soit on était déjà en session et on ne fait que suivre.
@@ -56,7 +63,7 @@ class ServiceNowApi
 			$samlr = $samlr[1];
 		else if(preg_match('/name="execution"[^>]*value="([^"]*)"/', $pAuth, $execu))
 		{
-			$idMdp = $this->_idMdp();
+			$idMdp = $this->_idMdp(ServiceNowApi::SSO);
 			$execu = $execu[1];
 			$samlr = $n->allerEtTrouver($n->url(), array
 			(
@@ -78,15 +85,37 @@ class ServiceNowApi
 		}
 		else
 			throw new Exception("Je suis perdu, page d'authentification inattendue à ".$n->url());
-		$page = $n->allerEtTrouver($this->_racine.'/navpage.do', array('RelayState' => $this->_racine.'/navpage.do', 'SAMLResponse' => $samlr), 'moi', "/NOW.user.name = '(.*)'/");
+			$lard = array('RelayState' => $this->_racine.'/navpage.do', 'SAMLResponse' => $samlr);
+		}
+		else
+		{
+			// Mire d'authentification classique (mais coincée dans un iframe un peu compliqué, on préfère attaquer en direct).
+			$suite = $n->aller('/welcome.do');
+			preg_match_all('|<input[^>]*name="([^">]*)"[^>]*value="([^">]*)"|', $suite, $r);
+			$formu = array_combine($r[1], $r[2]);
+			$idMdp = $this->_idMdp(ServiceNowApi::INTERNE);
+			$formu['user_name'] = $idMdp[0];
+			$formu['user_password'] = $idMdp[1];
+			$formu['sys_action'] = 'sysverb_login';
+			$suite = $n->aller('/login.do', $formu);
+			// Redirigé, on peut trouver dans la page un g_url = puis un nav_to.do?uri=<g_url>
+			//$suite = $n->aller('/navpage.do');
+			if(preg_match('#outputmsg_error.*<div class="outputmsg_text"[^>]*>(.*)</div>#Us', $suite, $rexp))
+			{
+				// Au passage si l'on est sur cette page on a le lien pour réinitialiser son mot de passe.
+				$mess = trim(preg_replace('#<[^>]*>#', '', $rexp[1]));
+				throw new Exception("Erreur d'authentification: ".$mess);
+			}
+		}
+		$page = $n->allerEtTrouver($this->_racine.'/navpage.do', $lard, 'moi', "/NOW.user.name = '(.*)'/");
 		
 		if(isset($this->_cache))
 			file_put_contents($this->_cache, serialize($this->_n));
 	}
 	
-	protected function _idMdp()
+	protected function _idMdp($canal)
 	{
-		throw new Exception('Authentification demandée. Veuillez surcharger la méthode pour renvoyer [ identifiant, mot de passe, chaîne à trouver attestant de la bonne connexion ]');
+		throw new Exception("Authentification demandée sur le canal $canal. Veuillez surcharger la méthode pour renvoyer [ identifiant, mot de passe ]");
 	}
 	
 	public function csv($table, $champs = null, $filtre = null)
