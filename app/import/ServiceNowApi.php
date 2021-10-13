@@ -122,6 +122,25 @@ class ServiceNowApi
 		throw new Exception("Authentification demandée sur le canal $canal. Veuillez surcharger la méthode pour renvoyer [ identifiant, mot de passe ]");
 	}
 	
+	public function aller($url, $formu = null, $tenterAuth = true)
+	{
+		if(substr($url, 0, 1) == '/')
+			$url = $this->_racine.$url;
+		
+		$r = $this->_n->obtenir($url, $formu, true, $enTêtes);
+		$err = // Selon que l'on tape une ressource HTML ou XML.
+			$r == ''
+			|| strpos($r, 'invalid token') !== false
+			|| strpos($r, '<script>window.top.location.replace(') !== false
+		;
+		if($err && $tenterAuth && !isset($this->_auth))
+		{
+			$this->auth();
+			$r = $this->aller($url, $formu, false);
+		}
+		return $r;
+	}
+	
 	public function csv($table, $champs = null, $filtre = null)
 	{
 		$filtre = isset($filtre) ? '&sysparm_query='.$this->_filtre($filtre) : '';
