@@ -112,6 +112,9 @@ class ServiceNowApi
 			throw new Exception("Authentification échouée, impossible de retrouver notre nom dans la page.");
 		else
 			fprintf(STDERR, "[32mBienvenue %s![0m\n", $page);
+		// Clé pour les appels JSON.
+		if(preg_match_all('/g_ck *= *[\'"]([^\'"]*)[\'"]/', $n->page, $résrég))
+			$this->_n->jeton = $résrég[1][0];
 		
 		if(isset($this->_cache))
 			file_put_contents($this->_cache, serialize($this->_n));
@@ -126,6 +129,7 @@ class ServiceNowApi
 	{
 		if(substr($url, 0, 1) == '/')
 			$url = $this->_racine.$url;
+		$enTêtes = isset($this->_n->jeton) ? array('X-UserToken' => $this->_n->jeton) : null;
 		
 		$r = $this->_n->obtenir($url, $formu, true, $enTêtes);
 		$err = // Selon que l'on tape une ressource HTML ou XML.
