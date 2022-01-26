@@ -70,7 +70,7 @@ class JiraApi
 					$liens[$lien->type->inward][$de][$vers] = 1;
 				}
 			if(count($liés))
-				$cr .= ' [-> '.implode(', ', array_keys($liés)).']';
+				$cr .= ' [95m[-> '.implode(', ', array_keys($liés)).'][0m';
 			$bien = self::OUI;
 			if(isset($plaf) && count($liés) > $plaf && !isset($plus[$num]))
 			{
