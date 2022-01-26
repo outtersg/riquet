@@ -8,6 +8,14 @@ class JiraApi
 		$this->_idMdp = $idMdp;
 	}
 	
+	protected function _aff($num, $rés = null)
+	{
+		if(!$rés)
+			printf("[%s]\t", $num);
+		else
+			printf("\r[%s]\t%s\n", $num, $rés);
+	}
+	
 	public function api($méthode, $uri, $params = null)
 	{
 		$c = curl_init($this->_racine.'/rest/api/latest'.$uri);
