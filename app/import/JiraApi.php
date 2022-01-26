@@ -71,7 +71,20 @@ class JiraApi
 				}
 			if(count($liés))
 				$cr .= ' [-> '.implode(', ', array_keys($liés)).']';
-			$this->_aff($num, $cr);
+			$bien = self::OUI;
+			if(isset($plaf) && count($liés) > $plaf && !isset($plus[$num]))
+			{
+				$bien = self::BOF;
+				$cr .= ' [33m(trop de liens)[0m';
+			}
+			$this->_aff($num, $bien, $cr);
+			
+			$faits[$num] = 1;
+			
+			// On remet en lice les liés, sous condition.
+			
+			if($bien == self::OUI && !isset($moins[$num]))
+				$àFaire = array_keys(array_flip($àFaire) + array_diff_key($liés, $faits));
 		}
 	}
 	
