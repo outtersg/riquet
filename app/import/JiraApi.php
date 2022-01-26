@@ -2,6 +2,19 @@
 
 class JiraApi
 {
+	const OUI = 1;
+	const NON = -1;
+	const BOF = 0;
+	const RIEN = -99;
+	
+	static $Couls = array
+	(
+		self::OUI => '32',
+		self::NON => '31',
+		self::BOF => '33',
+		self::RIEN => '90',
+	);
+	
 	public function __construct($url, $idMdp)
 	{
 		$this->_racine = $url;
@@ -62,12 +75,20 @@ class JiraApi
 		}
 	}
 	
-	protected function _aff($num, $rés = null)
+	protected function _aff($num, $rés = null, $détail = null)
 	{
-		if(!$rés)
-			printf("[%s]\t", $num);
+		if($détail === null && $rés)
+		{
+			$détail = $rés;
+			$rés = self::OUI;
+		}
+		$coul = self::$Couls[isset($rés) ? $rés : self::RIEN];
+		$coul = '['.$coul.'m';
+		$neutre = '[0m';
+		if(!$détail)
+			printf("%s[%s]%s\t", $coul, $num, $neutre);
 		else
-			printf("\r[%s]\t%s\n", $num, $rés);
+			printf("\r%s[%s]%s\t%s\n", $coul, $num, $neutre, $détail);
 	}
 	
 	public function api($méthode, $uri, $params = null)
