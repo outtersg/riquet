@@ -58,6 +58,8 @@ class JiraApi
 		{
 			$this->_aff($num);
 			$j = $this->api('GET', '/issue/'.$num);
+			$j->fields->id = $j->id;
+			$j->fields->key = $j->key;
 			$j = $j->fields; // L'enrobage ne nous intéresse pas.
 			$cr = $j->summary;
 			$liens = array();
