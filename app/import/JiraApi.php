@@ -15,10 +15,11 @@ class JiraApi
 		self::RIEN => '90',
 	);
 	
-	public function __construct($url, $idMdp)
+	public function __construct($url, $idMdp, $sortie)
 	{
 		$this->_racine = $url;
 		$this->_idMdp = $idMdp;
+		$this->_sortie = $sortie;
 	}
 	
 	public function lancer($params)
@@ -54,6 +55,8 @@ class JiraApi
 		$faits = array();
 		$liens = array();
 		
+		$this->_sortie->début();
+		
 		while($num = array_shift($àFaire))
 		{
 			$this->_aff($num);
@@ -87,7 +90,15 @@ class JiraApi
 			
 			if($bien == self::OUI && !isset($moins[$num]))
 				$àFaire = array_keys(array_flip($àFaire) + array_diff_key($liés, $faits));
+			
+			// Poussage!
+			
+			$this->_sortie->pousserFiche($j);
 		}
+		
+		$this->_sortie->pousserLiens($liens);
+		
+		$this->_sortie->fin();
 	}
 	
 	protected function _aff($num, $rés = null, $détail = null)
