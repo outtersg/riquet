@@ -14,7 +14,7 @@ _actu()
 	
 	titre "[[[ IMPORT JIRA ]]]"
 	
-	local optimport= temp=1 comm=
+	local suf= optimport= temp=1 comm=
 	
 	while [ $# -gt 0 ]
 	do
@@ -30,7 +30,13 @@ _actu()
 		esac
 		shift
 	done
+	[ -z "$temp" ] || suf="$suf.temp"
+	
+	local sql="$VAR/init.jira$suf.sql"
 	
 	php "$SCRIPTS/../app/maj.php"
-	php "$SCRIPTS/jiraimport.php" $optimport "$@"
+	php "$SCRIPTS/jiraimport.php" $optimport "$@" > "$sql"
+	
+	titre "Intégration des Jira à la base"
+	sqlite3 "$BDD" < "$sql"
 }
