@@ -99,9 +99,9 @@ class JiraApi
 		$coul = '['.$coul.'m';
 		$neutre = '[0m';
 		if(!$détail)
-			printf("%s[%s]%s\t", $coul, $num, $neutre);
+			fprintf(STDERR, "%s[%s]%s\t", $coul, $num, $neutre);
 		else
-			printf("\r%s[%s]%s\t%s\n", $coul, $num, $neutre, $détail);
+			fprintf(STDERR, "\r%s[%s]%s\t%s\n", $coul, $num, $neutre, $détail);
 	}
 	
 	public function api($méthode, $uri, $params = null)
