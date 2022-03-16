@@ -38,7 +38,7 @@ param()
 }
 
 analyserParametres "$@"
-reqUri="`param servicenow`/incident.do?sys_id='||f.id_ext||'"
+reqUri="`param servicenow`/incident.do?sysparm_query=number='||f.num||'"
 sqlite3 "$BDD" \
 "
 	select $metato'['||f.num||'|$reqUri]'$metatf$cols

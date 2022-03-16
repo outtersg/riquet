@@ -105,7 +105,7 @@ class Liens
 		}
 		
 		$url = $this->app->config['servicenow'];
-		$reqUri = "$url/incident.do?sys_id='||f.id_ext||'";
+		$reqUri = "$url/incident.do?sysparm_query=number='||f.num||'";
 		switch($mode & Liens::FORMAT)
 		{
 			case Liens::HTML: $aff = "'<div><a href=\"$reqUri\"'||$metato'>'||f.num||'</a>$cols</div>'"; break;
