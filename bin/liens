@@ -38,9 +38,10 @@ param()
 }
 
 analyserParametres "$@"
+reqUri="`param servicenow`/incident.do?sys_id='||f.id_ext||'"
 sqlite3 "$BDD" \
 "
-	select $metato'['||f.num||'|`param servicenow`/incident.do?sys_id='||f.id_ext||']'$metatf$cols
+	select $metato'['||f.num||'|$reqUri]'$metatf$cols
 	from f
 	$etats
 	where $where order by f.num desc;
