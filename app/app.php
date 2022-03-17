@@ -5,13 +5,15 @@ ini_set('display_errors', 1);
 
 define('R', dirname(dirname(__FILE__)));
 
+require_once R.'/app/Bdd.php';
+
 class App
 {
 	public function __construct()
 	{
 		include dirname(__FILE__).'/../etc/riquet.php';
 		$this->config = $config;
-		$this->bdd = new PDO($this->config['bdd']);
+		$this->bdd = new Bdd($this->config['bdd']);
 		$this->bdd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 	}
 	
