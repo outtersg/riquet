@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head/>
+<meta charset="utf-8">
+<body>
+<!-- Largement issu de https://bl.ocks.org/magjac/4acffdb3afbc4f71b448a210b5060bca -->
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<script src="https://unpkg.com/@hpcc-js/wasm@0.3.11/dist/index.min.js"></script>
+<script src="https://unpkg.com/d3-graphviz@3.0.5/build/d3-graphviz.js"></script>
+<div id="graph" style="text-align: center;"></div>
+<script>
+
+var dotIndex = 0;
+var graphviz = d3.select("#graph").graphviz()
+	.logEvents(true)
+	.on("initEnd", render);
+
+function render() {
+	var dotLines = dots[dotIndex];
+	var dot = dotLines.join('');
+	graphviz
+		.renderDot(dot)
+		.on("end", function () {
+			dotIndex = (dotIndex + 1) % dots.length;
+			//render();
+		});
+}
+
+var dots =
+[
+	[ '<?php echo strtr($dot, array("'" => "\\'", "\n" => '\n')); ?>' ],
+];
+
+</script>
+</body>
+</html>
+
