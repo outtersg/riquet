@@ -72,7 +72,14 @@ class ExportDot
 		if(!$props) return '';
 		$r = array();
 		foreach($props as $clé => $val)
-			$r[] = $clé.'="'.strtr($val, array('"' => '\"')).'"';
+		{
+			$val =
+				substr($val, 0, 1) == '<'
+				? $val
+				: '"'.strtr($val, array('"' => '\"')).'"'
+			;
+			$r[] = $clé.'='.$val;
+		}
 		return '[ '.implode(', ', $r).' ]';
 	}
 	
