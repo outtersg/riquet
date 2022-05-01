@@ -52,6 +52,7 @@ class ExportDot
 		foreach($nœuds as $id => $nœud)
 			$affn[] = 'n'.$id.' '.$this->style($this->propsNœud($nœud));
 		$affn = array_map(function($x) { return "\t".$x."\n"; }, $affn);
+		$affl = array();
 		foreach($liens as $type => $liensType)
 		{
 			$inv = in_array($type, static::$LiensInverses);
