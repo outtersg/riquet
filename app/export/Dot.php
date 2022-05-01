@@ -50,7 +50,7 @@ class ExportDot
 	{
 		$affn = array();
 		foreach($nœuds as $id => $nœud)
-			$affn[] = 'n'.$id.' '.$this->style($this->propsNœud($nœud));
+			$affn[] = $this->id($nœud).' '.$this->style($this->propsNœud($nœud));
 		$affn = array_map(function($x) { return "\t".$x."\n"; }, $affn);
 		$affl = array();
 		foreach($liens as $type => $liensType)
@@ -59,12 +59,23 @@ class ExportDot
 			foreach($liensType as $source => $cibles)
 				foreach($cibles as $cible => $poids)
 				{
-					if($inv) { $hop = $source; $source = $cible; $cible = $hop; }
-					$affl[] = 'n'.$source.' -> '.'n'.$cible.' '.$this->style($this->propsLien($type, $poids));
+					$idSource = $this->id($nœuds[$inv ? $cible : $source]);
+					$idCible = $this->id($nœuds[$inv ? $source : $cible]);
+					$affl[] = $idSource.' -> '.$idCible.' '.$this->style($this->propsLien($type, $poids));
 				}
 		}
 		$affl = array_map(function($x) { return "\t".$x."\n"; }, $affl);
 		return 'digraph'."\n".'{'."\n".implode('', $affn).implode('', $affl)."\n".'}';
+	}
+	
+	/**
+	 * Renvoie un identifiant dot pour le nœud passé en paramètre.
+	 * 
+	 * @return string ID dot; en plus de respecter la nomenclature dot (alphanum, pas de num en premier), est idéalement stable: ainsi deux graphes incluant le même nœud l'auront sous le même identifiant, ce qui permettra une transition entre les graphes.
+	 */
+	protected function id($nœud)
+	{
+		return strtr($nœud['num'], '-', '_');
 	}
 	
 	protected function style($props)
