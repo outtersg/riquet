@@ -94,7 +94,37 @@ class ExportDot
 	
 	protected function jolibellé($libellé, $idéal = 32)
 	{
-		return htmlspecialchars($libellé);
+		// On essaie de découper le libellé en lignes de longueur proche, dans une certaine limite de caractères par ligne.
+		
+		$taille = mb_strlen($libellé);
+		$tFragment = $taille / ($nFragments = ceil($taille / $idéal));
+		$posDernier = 0;
+		$fragments = array();
+		for($i = 0; ++$i < $nFragments;)
+		{
+			// Partant de la césure "idéale", on sonde en alternant un coup à gauche, un coup à droite, jusqu'à trouver le premier espace à proximité de la césure.
+			$posi = $i * $tFragment - 0.5; // Une chaîne de 7 caractères à couper en 2 trouvera sa césure en 3,5, soit au caractère d'indice 3.
+			$pos = round($posi);
+			$pas = $pos < $posi ? 1 : -1; // Si l'arrondi nous fait partir un peu en arrière, le pas suivant sera en avant, et inversement.
+			while(true)
+			{
+				if($pos <= 0) continue 2;
+				if($pos >= $taille) break 2;
+				if(substr($libellé, $pos, 1) == ' ')
+					break;
+				$pos += $pas;
+				$pas = $pas > 0 ? -$pas - 1 : -$pas + 1;
+			}
+			if($pos > $posDernier)
+			{
+				$fragments[] = substr($libellé, $posDernier, $pos - $posDernier);
+				$posDernier = $pos + 1; // On saute aussi l'espace.
+			}
+		}
+		if($posDernier < $taille)
+			$fragments[] = substr($libellé, $posDernier);
+		
+		return implode('<br/>', array_map('htmlspecialchars', $fragments));
 	}
 	
 	protected function propsLien($type, $poids)
