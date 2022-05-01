@@ -86,7 +86,6 @@ class JiraApi
 			$j->fields->key = $j->key;
 			$j = $j->fields; // L'enrobage ne nous intéresse pas.
 			$cr = $j->summary;
-			$liens = array();
 			$liés = array();
 			if(isset($j->issuelinks))
 				foreach($j->issuelinks as $lien)
