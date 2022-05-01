@@ -87,8 +87,14 @@ class ExportDot
 	{
 		return array
 		(
-			'label' => $nœud['num'],
+			'label' => '<<table border="0" cellborder="1" cellspacing="0"><tr><td>'.$nœud['num'].'</td></tr><tr><td>'.$this->jolibellé($nœud['nom']).'</td></tr></table>>',
+			'shape' => 'plain',
 		);
+	}
+	
+	protected function jolibellé($libellé, $idéal = 32)
+	{
+		return htmlspecialchars($libellé);
 	}
 	
 	protected function propsLien($type, $poids)
