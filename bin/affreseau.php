@@ -68,6 +68,34 @@ class AffRéseau
 		return $groupes + array_intersect_key($params, array('f' => 1)) + array('f' => 'html');
 	}
 	
+	protected function _analyserArgs($args)
+	{
+		$groupes = array
+		(
+			'+' => array(),
+			'=' => array(),
+			'-' => array(),
+		);
+		
+		for($i = 0; ++$i < count($args);)
+		{
+			switch($arg = $args[$i])
+			{
+				default:
+					switch(substr($arg, 0, 1))
+					{
+						case '-': $signe = '-'; $arg = substr($arg, 1); break;
+						case '=': $signe = '='; $arg = substr($arg, 1); break;
+						default: $signe = '+'; break;
+					}
+					$groupes[$signe][] = $arg;
+					break;
+			}
+		}
+		
+		return $groupes + array('f' => 'dot');
+	}
+	
 	public function aff($params)
 	{
 		require_once R.'/app/ChargeurBdd.php';
@@ -111,6 +139,6 @@ class AffRéseau
 
 $app = new App();
 $affRéseau = new AffRéseau($app);
-$affRéseau->analyserParamètresEtFaire(isset($_GET) ? $_GET : $argv);
+$affRéseau->analyserParamètresEtFaire(isset($argv) ? $argv : $_GET);
 
 ?>
