@@ -21,11 +21,16 @@
  * SOFTWARE.
  */
 
+require_once R.'/app/Parcours.php';
+
 class JiraApi
 {
+	use MonoChargeur;
+	
 	const OUI = 1;
 	const NON = -1;
 	const BOF = 0;
+	const BONDACC = 2; // Ç'aurait dû être BOF, mais suite à insistance de la direction, c'est OUI.
 	const RIEN = -99;
 	
 	static $Couls = array
@@ -33,6 +38,7 @@ class JiraApi
 		self::OUI => '32',
 		self::NON => '31',
 		self::BOF => '33',
+		self::BONDACC => '36',
 		self::RIEN => '90',
 	);
 	
@@ -73,52 +79,66 @@ class JiraApi
 	 */
 	public function faire($àFaire, $plaf, $moins, $plus)
 	{
-		$faits = array();
-		$liens = array();
+		$p = new Parcours($this);
 		
 		$this->_sortie->début();
 		
-		while($num = array_shift($àFaire))
-		{
+		list($nœuds, $liens) = $p->parcourir(array_merge($àFaire, $plus), $moins, [], $plaf);
+		
+		$this->_sortie->pousserLiens($liens);
+		
+		$this->_sortie->fin();
+	}
+	
+	public function charger($àFaire) { return $this->_chargerUnParUn($àFaire); }
+	
+	public function chargerUn($num)
+	{
 			$this->_aff($num);
 			$j = $this->api('GET', '/issue/'.$num);
 			$j->fields->id = $j->id;
 			$j->fields->key = $j->key;
 			$j = $j->fields; // L'enrobage ne nous intéresse pas.
-			$cr = $j->summary;
-			$liés = array();
+		
+		// On consolide ici les liens, tel que chargerLiens devra les renvoyer.
+		$liens = [];
 			if(isset($j->issuelinks))
 				foreach($j->issuelinks as $lien)
 				{
-					if(isset($lien->outwardIssue)) { $de = $num; $liés[$vers = $lien->outwardIssue->key] = 1; }
-					else { $vers = $num; $liés[$de = $lien->inwardIssue->key] = 1; }
+				if(isset($lien->outwardIssue)) { $de = $num; $vers = $lien->outwardIssue->key; }
+				else { $vers = $num; $de = $lien->inwardIssue->key; }
 					$liens[$lien->type->inward][$de][$vers] = 1;
 				}
+		$j->_liens = $liens;
+		
+		// Poussage!
+		
+		$this->_sortie->pousserFiche($j);
+		return $j;
+	}
+	
+	public function notifRetenu($num, $j, $liés, $niveauRetenu)
+	{
+		$cr = $j->summary;
 			if(count($liés))
 				$cr .= ' [95m[-> '.implode(', ', array_keys($liés)).'][0m';
-			$bien = self::OUI;
-			if(isset($plaf) && count($liés) > $plaf && !isset($plus[$num]))
-			{
+		$bien = self::OUI;
+		switch($niveauRetenu)
+		{
+			case Parcours::GROS:
 				$bien = self::BOF;
 				$cr .= ' [33m(trop de liens)[0m';
+				break;
+			case Parcours::FORCÉ:
+				$cr .= ' ['.self::$Couls[self::BONDACC].'m(trop de liens mais forcé)[0m';
+				break;
 			}
 			$this->_aff($num, $bien, $cr);
-			
-			$faits[$num] = 1;
-			
-			// On remet en lice les liés, sous condition.
-			
-			if($bien == self::OUI && !isset($moins[$num]))
-				$àFaire = array_keys(array_flip($àFaire) + array_diff_key($liés, $faits));
-			
-			// Poussage!
-			
-			$this->_sortie->pousserFiche($j);
-		}
-		
-		$this->_sortie->pousserLiens($liens);
-		
-		$this->_sortie->fin();
+	}
+	
+	public function chargerLiensUn($nœud)
+	{
+		return $nœud->_liens;
 	}
 	
 	protected function _aff($num, $rés = null, $détail = null)
