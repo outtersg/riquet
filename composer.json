@@ -1,7 +1,7 @@
 {
     "require":
 	{
-        "php": ">=5.3",
+        "php": ">=5.4",
         "gui/majeur": ">= 1.1",
         "gui/musqle": ">= 1.3",
         "gui/sqleur": ">= 1.3",
