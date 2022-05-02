@@ -56,10 +56,13 @@ class Parcours
 		{
 			$nouveaux = $this->chargeur->charger($àFaire);
 			$nouveauxLiens = $this->chargeur->chargerLiens($nouveaux);
+			// $nouveauxLiens doit avoir pour indices de premier niveau le type de lien. Si c'est un "bête" tableau (indices numériques), c'est sans doute un agrégat de tableaux retour indépendants (à combiner).
+			$listesDeNouveauxLiens = isset($nouveauxLiens[0]) ? $nouveauxLiens : [ $nouveauxLiens ];
 			
 			/* Parcours des liens. */
 			
 			$liés = array();
+			foreach($listesDeNouveauxLiens as $nouveauxLiens)
 			foreach($nouveauxLiens as $lType => $ls1)
 			{
 				$ls1 = array_diff_key($ls1, $moins);
