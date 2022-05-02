@@ -62,6 +62,7 @@ class JiraApi
 					{
 						case '-': $moins[substr($param, 1)] = 1; break;
 						case '+': $plus[substr($param, 1)] = 1; break;
+						case '=': $bofs[substr($param, 1)] = 1; break;
 						default: $àFaire[] = $param; break;
 					}
 			}
