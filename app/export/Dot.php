@@ -59,6 +59,9 @@ class ExportDot
 			foreach($liensType as $source => $cibles)
 				foreach($cibles as $cible => $poids)
 				{
+					if(!isset($nœuds[$cible]) || !isset($nœuds[$source]))
+						/* À FAIRE: plutôt que de botter en touche, attacher un nœud factice indiquant le nombre de liens non représentés (+3 dans un cercle en pointillés par exemple, en same_rank). La difficulté étant de faire ce décompte par nœud, alors qu'on est tantôt cible, tantôt source. */
+						continue;
 					$idSource = $this->id($nœuds[$inv ? $cible : $source]);
 					$idCible = $this->id($nœuds[$inv ? $source : $cible]);
 					$affl[] = $idSource.' -> '.$idCible.' '.$this->style($this->propsLien($type, $poids));
