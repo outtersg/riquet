@@ -31,7 +31,7 @@ class Parcours
 	
 	public function __construct($chargeur)
 	{
-		$this->chargeur = $chargeur;
+		$this->chargeur = method_exists($chargeur, 'charger') ? $chargeur : new ProxyMonoChargeur($chargeur);
 	}
 	
 	public function parcourir($plus, $moins = array(), $bofs = array(), $plaf = 5)
@@ -105,6 +105,38 @@ class Parcours
 		
 		return array($faits, $liens);
 	}
+}
+
+trait MonoChargeur
+{
+	public function charger($àFaire)
+	{
+		$nœuds = [];
+		foreach($àFaire as $id)
+			$nœuds[$id] = $this->chargerUn($id);
+		return $nœuds;
+	}
+	
+	public function chargerLiens($àFaire)
+	{
+		$liens = [];
+		foreach($àFaire as $truc)
+			$liens[] = $this->chargerLiensUn($truc);
+		return $liens;
+	}
+}
+
+class ProxyMonoChargeur
+{
+	use MonoChargeur;
+	
+	public function __construct($chargeur)
+	{
+		$this->_chargeur = $chargeur;
+	}
+	
+	public function chargerUn($id) { return $this->_chargeur->chargerUn($id); }
+	public function chargerLiensUn($truc) { return $this->_chargeur->chargerLiensUn($truc); }
 }
 
 ?>
