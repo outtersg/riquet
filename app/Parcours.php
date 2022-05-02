@@ -29,6 +29,10 @@ class Parcours
 	 */
 	protected $_plaf = 5;
 	
+	const NORMAL = 1;
+	const GROS = 0;
+	const FORCÉ = 2;
+	
 	public function __construct($chargeur)
 	{
 		$this->chargeur = method_exists($chargeur, 'charger') ? $chargeur : new ProxyMonoChargeur($chargeur);
@@ -49,10 +53,12 @@ class Parcours
 			$bofs = array_combine($bofs, $bofs);
 		}
 		
+		$notifRetenus = method_exists($this->chargeur, 'notifRetenu');
+		
 		$faits = array();
 		$liens = array();
 		$àFaire = array_keys($plus);
-		while(count($àFaire))
+		while(count($àFaire) || (isset($this->chargeur->_àCharger) && count($this->chargeur->_àCharger)))
 		{
 			$nouveaux = $this->chargeur->charger($àFaire);
 			$nouveauxLiens = $this->chargeur->chargerLiens($nouveaux);
@@ -89,9 +95,14 @@ class Parcours
 			 * On ignore donc les bofs, ainsi que les nœuds accessibles uniquement par des bofs.
 			 */
 			
+			$bofsCeTourCi = [];
 			foreach($àFaire = array_diff_key($liés, $faits) as $id => $autres)
 				if(count($autres) > $plaf)
-					$bofs[$id] = true;
+					$bofsCeTourCi[$id] = !isset($plus[$id]); // Le fait de figurer dans $plus offre un repêchage.
+			$bofs += array_filter($bofsCeTourCi);
+			if($notifRetenus)
+				foreach($nouveaux as $id => $données)
+					$this->chargeur->notifRetenu($id, $données, $àFaire[$id], isset($bofsCeTourCi[$id]) ? ($bofsCeTourCi[$id] ? self::GROS : self::FORCÉ) : self::NORMAL);
 			$àFaire = array_diff_key($àFaire, $nouveaux);
 			foreach($àFaire as $id => $autres)
 				if(!count(array_diff_key($autres, $bofs)))
@@ -123,6 +134,33 @@ trait MonoChargeur
 		foreach($àFaire as $truc)
 			$liens[] = $this->chargerLiensUn($truc);
 		return $liens;
+	}
+	
+	/**
+	 * Rétenteur.
+	 * Les classes qui, pour des besoins de retour utilisateur, ont besoin d'appeler notifRetenu() au fur et à mesure,
+	 * peuvent surcharger charger() par un appel à cette fonction.
+	 */
+	/* À FAIRE: découpler chargement et calcul des liens dans le Parcours.
+	 * Cela sera nécessaire si on veut pouvoir faire du chargement parallèle:
+	 * pour l'heure le fonctionnement est
+	 *   foreach(ids) chargerUn(id); // ou charger(ids)
+	 *   foreach(ids) chargerLiensUn(id); // ou chargerLiens(ids)
+	 *   foreach(ids) notifRetenu(id);
+	 * qui marche bien en SQL (charger(ids) est une seule opération; et ainsi le chargerLiens peut travailler sur ensemble plutôt qu'unité)
+	 * mais pas en WS (on voudrait pouvoir lancer tous les chargements en parallèle, puis *au fur et à mesure* qu'on reçoit, chargerLiensUn et notifRetenu),
+	 * ce que l'on pallie par ce _chargerUnParUn mais ne résoud pas nos problèmes.
+	 * Il faudrait donc que le chargerLiensUn et le notifRetenu soient appelés sur retour de charger ou chargerUn.
+	 */
+	protected function _chargerUnParUn($àFaire)
+	{
+		isset($this->_àCharger) || $this->_àCharger = [];
+		$this->_àCharger += array_flip($àFaire);
+		foreach($this->_àCharger as $id => $bla)
+		{
+			unset($this->_àCharger[$id]);
+			return [ $id => $this->chargerUn($id) ];
+		}
 	}
 }
 
