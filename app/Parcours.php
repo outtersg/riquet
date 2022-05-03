@@ -62,6 +62,26 @@ class Parcours
 		{
 			$nouveaux = $this->chargeur->charger($àFaire);
 			$nouveauxLiens = $this->chargeur->chargerLiens($nouveaux);
+			
+			$this->_enCours = [ & $liens, & $faits, $plus, $moins, & $bofs, $plaf, $notifRetenus ];
+			list($nouveaux, $àFaire) = $this->_reçu($nouveaux, $nouveauxLiens);
+			
+			/* Enregistrement et tour suivant. */
+			
+			$faits += $nouveaux;
+			$àFaire = array_keys($àFaire);
+		}
+		
+		return array($faits, $liens);
+	}
+	
+	protected function _reçu($nouveaux, $nouveauxLiens)
+	{
+		list($liens, $faits, $plus, $moins, $bofs, $plaf, $notifRetenus) = $this->_enCours;
+		$liens =& $this->_enCours[0];
+		$faits =& $this->_enCours[1];
+		$bofs =& $this->_enCours[4];
+		
 			// $nouveauxLiens doit avoir pour indices de premier niveau le type de lien. Si c'est un "bête" tableau (indices numériques), c'est sans doute un agrégat de tableaux retour indépendants (à combiner).
 			$listesDeNouveauxLiens = isset($nouveauxLiens[0]) ? $nouveauxLiens : [ $nouveauxLiens ];
 			
@@ -107,14 +127,8 @@ class Parcours
 			foreach($àFaire as $id => $autres)
 				if(!count(array_diff_key($autres, $bofs)))
 					unset($àFaire[$id]);
-			
-			/* Enregistrement et tour suivant. */
-			
-			$faits += $nouveaux;
-			$àFaire = array_keys($àFaire);
-		}
 		
-		return array($faits, $liens);
+		return [ $nouveaux, $àFaire ];
 	}
 }
 
