@@ -172,17 +172,22 @@ class JiraApi
 	
 	public function api($méthode, $uri, $params = null)
 	{
-		$c = curl_init($this->_racine.'/rest/api/latest'.$uri);
-		curl_setopt($c, CURLOPT_CUSTOMREQUEST, $méthode);
-		curl_setopt($c, CURLOPT_USERPWD, $this->_idMdp);
 		$enTêtes = array
 		(
 			'Content-Type: application/json;charset=UTF-8',
 		);
-		curl_setopt($c, CURLOPT_HTTPHEADER, $enTêtes);
+		$o =
+		[
+			CURLOPT_CUSTOMREQUEST => $méthode,
+			CURLOPT_USERPWD => $this->_idMdp,
+			CURLOPT_HTTPHEADER => $enTêtes,
+			CURLOPT_RETURNTRANSFER => true,
+		];
 		if($params)
-			curl_setopt($c, CURLOPT_POSTFIELDS, $params);
-		curl_setopt($c, CURLOPT_RETURNTRANSFER, true);
+			$o[CURLOPT_POSTFIELDS] = $params;
+		
+		$c = curl_init($this->_racine.'/rest/api/latest'.$uri);
+		curl_setopt_array($c, $o);
 		$r = curl_exec($c);
 		curl_close($c);
 		
