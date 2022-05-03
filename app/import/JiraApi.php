@@ -22,6 +22,7 @@
  */
 
 require_once R.'/vendor/gui/util/AffT.php';
+require_once R.'/vendor/gui/dklab_soapclient/lib/Dklab/SoapClient.php';
 
 require_once R.'/app/Parcours.php';
 
@@ -187,10 +188,21 @@ class JiraApi
 		if($params)
 			$o[CURLOPT_POSTFIELDS] = $params;
 		
+		if(class_exists('Dklab_SoapClient_Curl'))
+		{
+			$cm = new Dklab_SoapClient_Curl();
+			$clé = $cm->addRequest($o, null);
+			$r = $cm->getResult($clé);
+			// À FAIRE: un peu plus d'exploration du code retour?
+			$r = $r['body'];
+		}
+		else
+		{
 		$c = curl_init();
 		curl_setopt_array($c, $o);
 		$r = curl_exec($c);
 		curl_close($c);
+		}
 		
 		return json_decode($r);
 	}
