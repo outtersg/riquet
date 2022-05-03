@@ -178,6 +178,7 @@ class JiraApi
 		);
 		$o =
 		[
+        	CURLOPT_URL => $this->_racine.'/rest/api/latest'.$uri,
 			CURLOPT_CUSTOMREQUEST => $méthode,
 			CURLOPT_USERPWD => $this->_idMdp,
 			CURLOPT_HTTPHEADER => $enTêtes,
@@ -186,7 +187,7 @@ class JiraApi
 		if($params)
 			$o[CURLOPT_POSTFIELDS] = $params;
 		
-		$c = curl_init($this->_racine.'/rest/api/latest'.$uri);
+		$c = curl_init();
 		curl_setopt_array($c, $o);
 		$r = curl_exec($c);
 		curl_close($c);
