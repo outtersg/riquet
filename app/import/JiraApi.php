@@ -21,6 +21,8 @@
  * SOFTWARE.
  */
 
+require_once R.'/vendor/gui/util/AffT.php';
+
 require_once R.'/app/Parcours.php';
 
 class JiraApi
@@ -82,6 +84,8 @@ class JiraApi
 	{
 		$p = new Parcours($this);
 		
+		$this->_aff = new AffT(STDERR);
+		
 		$this->_sortie->début();
 		
 		list($nœuds, $liens) = $p->parcourir(array_merge($àFaire, $plus), $moins, [], $plaf);
@@ -89,6 +93,8 @@ class JiraApi
 		$this->_sortie->pousserLiens($liens);
 		
 		$this->_sortie->fin();
+		
+		$this->_aff->affl(null, '');
 	}
 	
 	public function charger($àFaire) { return $this->_chargerUnParUn($àFaire); }
@@ -152,10 +158,16 @@ class JiraApi
 		$coul = self::$Couls[isset($rés) ? $rés : self::RIEN];
 		$coul = '['.$coul.'m';
 		$neutre = '[0m';
-		if(!$détail)
-			fprintf(STDERR, "%s[%s]%s\t", $coul, $num, $neutre);
-		else
-			fprintf(STDERR, "\r%s[%s]%s\t%s\n", $coul, $num, $neutre, $détail);
+		
+		$numL = isset($this->_lignesDiag[$num]) ? $this->_lignesDiag[$num] : null;
+		$nesp = 4;
+		$tab = str_repeat(' ', $nesp - ((strlen($num) + 2) % $nesp)); // Émulation de tabulation pour AffT qui risque de tout décaler.
+		$aff = sprintf("%s[%s]%s$tab", $coul, $num, $neutre);
+		if($détail)
+			$aff .= $détail;
+		$this->_aff->affl($numL, $aff);
+		if(!isset($numL))
+			$this->_lignesDiag[$num] = $this->_aff->nl - 1;
 	}
 	
 	public function api($méthode, $uri, $params = null)
