@@ -53,34 +53,41 @@ class Parcours
 			$bofs = array_combine($bofs, $bofs);
 		}
 		
-		$notifRetenus = method_exists($this->chargeur, 'notifRetenu');
+		$this->faits = array();
+		$this->bofs = $bofs;
+		$this->liens = array();
+		$this->àFaire = $plus;
+		$this->enCours = [];
+		$this->_params =
+		[
+			'+' => $plus,
+			'-' => $moins,
+			'plaf' => $plaf,
+			'notif' => method_exists($this->chargeur, 'notifRetenu'),
+		];
 		
-		$faits = array();
-		$liens = array();
-		$àFaire = array_keys($plus);
-		while(count($àFaire) || (isset($this->chargeur->_àCharger) && count($this->chargeur->_àCharger)))
+		while(count($this->àFaire + $this->enCours) || (isset($this->chargeur->_àCharger) && count($this->chargeur->_àCharger)))
 		{
-			$nouveaux = $this->chargeur->charger($àFaire);
-			$nouveauxLiens = $this->chargeur->chargerLiens($nouveaux);
-			
-			$this->_enCours = [ & $liens, & $faits, $plus, $moins, & $bofs, $plaf, $notifRetenus ];
-			list($nouveaux, $àFaire) = $this->_reçu($nouveaux, $nouveauxLiens);
-			
-			/* Enregistrement et tour suivant. */
-			
-			$faits += $nouveaux;
-			$àFaire = array_keys($àFaire);
+			$this->enCours += ($àLancer = $this->àFaire);
+			$nouveaux = $this->chargeur->charger(array_keys($àLancer));
+			$this->_reçu($nouveaux);
 		}
 		
-		return array($faits, $liens);
+		return array($this->faits, $this->liens);
 	}
 	
-	protected function _reçu($nouveaux, $nouveauxLiens)
+	protected function _reçu($nouveaux)
 	{
-		list($liens, $faits, $plus, $moins, $bofs, $plaf, $notifRetenus) = $this->_enCours;
-		$liens =& $this->_enCours[0];
-		$faits =& $this->_enCours[1];
-		$bofs =& $this->_enCours[4];
+		$plus = $this->_params['+'];
+		$moins = $this->_params['-'];
+		$plaf = $this->_params['plaf'];
+		
+		$nouveauxLiens = $this->chargeur->chargerLiens($nouveaux);
+		
+		// Les reçus ne sont plus en cours; mais pas encore tout à fait faits,
+		// car reste une vérif à faire plus bas, savoir si on veut les entreposer complets (intéressants dans notre résultat) ou null (à écarter).
+		/* À FAIRE: $moins pourrait être une simple entrée [ id: null ] dans $this->faits, comme ça on évite d'arry_diff_key deux fois, une avoir $moins, une avec $this->faits. */
+		$this->enCours = array_diff_key($this->enCours, $nouveaux);
 		
 			// $nouveauxLiens doit avoir pour indices de premier niveau le type de lien. Si c'est un "bête" tableau (indices numériques), c'est sans doute un agrégat de tableaux retour indépendants (à combiner).
 			$listesDeNouveauxLiens = isset($nouveauxLiens[0]) ? $nouveauxLiens : [ $nouveauxLiens ];
@@ -97,9 +104,9 @@ class Parcours
 					$ls2 = array_diff_key($ls2, $moins);
 					if(count($ls2))
 					{
-						isset($liens[$lType][$lDe]) || $liens[$lType][$lDe] = array();
+					isset($this->liens[$lType][$lDe]) || $this->liens[$lType][$lDe] = array();
 						isset($liés[$lDe]) || $liés[$lDe] = array();
-						$liens[$lType][$lDe] += $ls2;
+					$this->liens[$lType][$lDe] += $ls2;
 						/* Décompte des liés
 						 * Chaque couple de nœuds ne compte qu'une fois, même si plusieurs liens les unissent.
 						 */
@@ -116,19 +123,21 @@ class Parcours
 			 */
 			
 			$bofsCeTourCi = [];
-			foreach($àFaire = array_diff_key($liés, $faits) as $id => $autres)
+		foreach($àFaire = array_diff_key($liés, $this->faits) as $id => $autres)
 				if(count($autres) > $plaf)
-					$bofsCeTourCi[$id] = !isset($plus[$id]); // Le fait de figurer dans $plus offre un repêchage.
-			$bofs += array_filter($bofsCeTourCi);
-			if($notifRetenus)
+				$bofsCeTourCi[$id] = !isset($this->_params['+'][$id]); // Le fait de figurer dans $this->_params['+'] offre un repêchage.
+		$this->bofs += array_filter($bofsCeTourCi);
+		if($this->_params['notif'])
 				foreach($nouveaux as $id => $données)
 					$this->chargeur->notifRetenu($id, $données, $àFaire[$id], isset($bofsCeTourCi[$id]) ? ($bofsCeTourCi[$id] ? self::GROS : self::FORCÉ) : self::NORMAL);
 			$àFaire = array_diff_key($àFaire, $nouveaux);
 			foreach($àFaire as $id => $autres)
-				if(!count(array_diff_key($autres, $bofs)))
+			if(!count(array_diff_key($autres, $this->bofs)))
 					unset($àFaire[$id]);
 		
-		return [ $nouveaux, $àFaire ];
+		$this->faits += $nouveaux;
+		$this->àFaire = $àFaire;
+		return $nouveaux;
 	}
 }
 
