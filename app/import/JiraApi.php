@@ -28,7 +28,7 @@ require_once R.'/app/Parcours.php';
 
 class JiraApi
 {
-	use MonoChargeur;
+	use MonoChargeur { charger as chargerBloc; }
 	
 	const OUI = 1;
 	const NON = -1;
@@ -98,7 +98,21 @@ class JiraApi
 		$this->_aff->affl(null, '');
 	}
 	
-	public function charger($àFaire) { return $this->_chargerUnParUn($àFaire); }
+	public function charger($àFaire, $parcours)
+	{
+		$this->_parcours = $parcours;
+		
+		// 3 modes:
+		// - chargement 1 à 1
+		// - chargement par lots (requête 1 à 1 mais interprétation par lots)
+		// - chargement en parallèle
+		
+		switch(0)
+		{
+			case 0: return $this->_chargerUnParUn($àFaire);
+			case 1: return $this->chargerBloc($àFaire);
+		}
+	}
 	
 	public function chargerUn($num)
 	{
