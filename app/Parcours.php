@@ -66,10 +66,14 @@ class Parcours
 			'notif' => method_exists($this->chargeur, 'notifRetenu'),
 		];
 		
-		while(count($this->àFaire + $this->enCours) || (isset($this->chargeur->_àCharger) && count($this->chargeur->_àCharger)))
+		while(count($this->àFaire + $this->enCours))
 		{
-			$this->enCours += ($àLancer = $this->àFaire);
-			$nouveaux = $this->chargeur->charger(array_keys($àLancer));
+			// enCours mémorise les entrées déjà passées en àFaire, mais non encore traitées
+			// (par exemple si charger() décide de ne pas traiter tout ce qu'on lui demande, mais de s'en garder une partie pour plus tard):
+			// supposant que le chargeur en a bien pris note, on évite de les lui redemander.
+			// Notons que pour éviter une boucle infinie, le chargeur DOIT renvoyer un null pour ce qu'il a tenté de charger sans succès.
+			$this->enCours += $this->àFaire;
+			$nouveaux = $this->chargeur->charger(array_keys($this->àFaire));
 			$this->_reçu($nouveaux);
 		}
 		
@@ -130,7 +134,7 @@ class Parcours
 		if($this->_params['notif'])
 				foreach($nouveaux as $id => $données)
 					$this->chargeur->notifRetenu($id, $données, $àFaire[$id], isset($bofsCeTourCi[$id]) ? ($bofsCeTourCi[$id] ? self::GROS : self::FORCÉ) : self::NORMAL);
-			$àFaire = array_diff_key($àFaire, $nouveaux);
+		$àFaire = array_diff_key($àFaire, $nouveaux, $this->enCours);
 			foreach($àFaire as $id => $autres)
 			if(!count(array_diff_key($autres, $this->bofs)))
 					unset($àFaire[$id]);
