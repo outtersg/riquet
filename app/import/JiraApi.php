@@ -22,7 +22,7 @@
  */
 
 require_once R.'/vendor/gui/util/AffT.php';
-require_once R.'/vendor/gui/dklab_soapclient/lib/Dklab/SoapClient.php';
+include_once R.'/vendor/gui/dklab_soapclient/lib/Dklab/SoapClient.php';
 
 require_once R.'/app/Parcours.php';
 
@@ -35,6 +35,8 @@ class JiraApi
 	const BOF = 0;
 	const BONDACC = 2; // Ç'aurait dû être BOF, mais suite à insistance de la direction, c'est OUI.
 	const RIEN = -99;
+	
+	protected $mode = 0;
 	
 	static $Couls = array
 	(
@@ -107,7 +109,7 @@ class JiraApi
 		// - chargement par lots (requête 1 à 1 mais interprétation par lots)
 		// - chargement en parallèle
 		
-		switch(0)
+		switch($this->mode)
 		{
 			case 0: return $this->_chargerUnParUn($àFaire);
 			case 1: return $this->chargerBloc($àFaire);
@@ -202,7 +204,10 @@ class JiraApi
 		if($params)
 			$o[CURLOPT_POSTFIELDS] = $params;
 		
-		if(class_exists('Dklab_SoapClient_Curl'))
+		// On utilise le multi_curl uniquement si nécessaire et disponible.
+		// Il pourrait fonctionner tout aussi bien sur les modes "simples" (sans le $this->mode >= 2),
+		// mais ne sortons le grand jeu que si nécessaire.
+		if($this->mode >= 2 && class_exists('Dklab_SoapClient_Curl'))
 		{
 			$cm = new Dklab_SoapClient_Curl();
 			$clé = $cm->addRequest($o, null);
