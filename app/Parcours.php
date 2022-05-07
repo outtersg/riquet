@@ -38,6 +38,21 @@ class Parcours
 		$this->chargeur = method_exists($chargeur, 'charger') ? $chargeur : new ProxyMonoChargeur($chargeur);
 	}
 	
+	/**
+	 * Parcourt une arborescence.
+	 *
+	 * N.B.: deux modes possibles:
+	 * - passif:
+	 *   le chargeur charge les nœuds au fur et à mesure qu'on les lui demande (par sa fonction charger()),
+	 *   après que le Parcours a décidé quels liens suivre.
+	 * - actif: 
+	 *   le chargeur décide lui-même de l'ordre dans lequel il charge ses nœuds.
+	 *   Il peut alors se servir du Parcours pour l'aider à déterminer par quels nœuds poursuivre,
+	 *   en notifiant le Parcours de ce qu'il a reçu (Parcours.reçu()) puis demandant quels nouveaux horizons cela lui ouvre pour sa prochaine salve d'exploration de nœuds (Parcours.àFaire()).
+	 *   Cf. import/JiraApi._reçu() pour un exemple de chargement actif par le Chargeur.
+	 *   N.B.: le Parcours DOIT être invoqué par parcourir (pour initialiser sa structure);
+	 *   le Chargeur continue à être invoqué par le Parcours, simplement il ne renverra pas depuis son charger() les nœuds déjà poussés au Parcours par reçu().
+	 */
 	public function parcourir($plus, $moins = array(), $bofs = array(), $plaf = 5)
 	{
 		if(method_exists($this->chargeur, 'idNums'))
@@ -73,7 +88,7 @@ class Parcours
 			// supposant que le chargeur en a bien pris note, on évite de les lui redemander.
 			// Notons que pour éviter une boucle infinie, le chargeur DOIT renvoyer un null pour ce qu'il a tenté de charger sans succès.
 			$nouveaux = $this->chargeur->charger($this->àFaire(), $this);
-			$this->_reçu($nouveaux);
+			$this->reçu($nouveaux);
 		}
 		
 		return array($this->faits, $this->liens);
@@ -89,7 +104,7 @@ class Parcours
 		return array_keys($this->àFaire);
 	}
 	
-	protected function _reçu($nouveaux)
+	public function reçu($nouveaux)
 	{
 		$plus = $this->_params['+'];
 		$moins = $this->_params['-'];
