@@ -72,12 +72,21 @@ class Parcours
 			// (par exemple si charger() décide de ne pas traiter tout ce qu'on lui demande, mais de s'en garder une partie pour plus tard):
 			// supposant que le chargeur en a bien pris note, on évite de les lui redemander.
 			// Notons que pour éviter une boucle infinie, le chargeur DOIT renvoyer un null pour ce qu'il a tenté de charger sans succès.
-			$this->enCours += $this->àFaire;
-			$nouveaux = $this->chargeur->charger(array_keys($this->àFaire));
+			$nouveaux = $this->chargeur->charger($this->àFaire(), $this);
 			$this->_reçu($nouveaux);
 		}
 		
 		return array($this->faits, $this->liens);
+	}
+	
+	/**
+	 * Renvoie la liste des prochains à faire, EN LA MARQUANT COMME PRISE EN CHARGE.
+	 * L'appelant s'engage donc à lancer les requêtes dans la foulée.
+	 */
+	public function àFaire()
+	{
+		$this->enCours += $this->àFaire;
+		return array_keys($this->àFaire);
 	}
 	
 	protected function _reçu($nouveaux)
