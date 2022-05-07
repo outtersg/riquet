@@ -6,7 +6,7 @@
         "gui/musqle": ">= 1.3",
         "gui/sqleur": ">= 1.3",
         "gui/util": ">= 1.1.220503",
-		"gui/dklab_soapclient": ">= 0.94.220104",
+		"gui/dklab_soapclient": ">= 0.94.220507",
         "ext-curl": "*",
         "ext-pdo": "*",
         "ext-openssl": "*"

@@ -36,7 +36,7 @@ class JiraApi
 	const BONDACC = 2; // Ç'aurait dû être BOF, mais suite à insistance de la direction, c'est OUI.
 	const RIEN = -99;
 	
-	protected $mode = 0;
+	protected $mode = 2;
 	
 	static $Couls = array
 	(
@@ -102,24 +102,59 @@ class JiraApi
 	
 	public function charger($àFaire, $parcours)
 	{
-		$this->_parcours = $parcours;
-		
 		// 3 modes:
 		// - chargement 1 à 1
 		// - chargement par lots (requête 1 à 1 mais interprétation par lots)
 		// - chargement en parallèle
 		
+		if($this->mode >= 2 && !class_exists('Dklab_SoapClient_Curl'))
+			$this->mode = 1;
+		
 		switch($this->mode)
 		{
 			case 0: return $this->_chargerUnParUn($àFaire);
 			case 1: return $this->chargerBloc($àFaire);
+			case 2: return $this->chargerAsync($àFaire, $parcours);
 		}
 	}
 	
-	public function chargerUn($num)
+	public function chargerAsync($àFaire, $parcours)
+	{
+		if(isset($this->_multicurl))
+			throw new Exception('charger() appelée alors que la précédente n\'a pas fini');
+		
+		$this->_parcours = $parcours;
+		
+		$this->_reqs = [];
+		$this->_lancerAsync($àFaire);
+		while(($réps = $this->_multicurl->getAvailableResults()) !== null)
+			if(!count($réps))
+				usleep(10000);
+			else
+				foreach($réps as $clé => $rép)
+					$this->_reçu($this->_reqs[$clé], $rép);
+		
+		$this->_multicurl = null;
+		// On ne renvoie rien: on a notifié le Parcours (notre appelant, qui attend notre résultat) au fur et à mesure que l'on recevait les trames.
+		return [];
+	}
+	
+	protected function _lancerAsync($àFaire)
+	{
+		foreach($àFaire as $id)
+			$this->_reqs[$this->chargerUn($id, true)] = $id;
+	}
+	
+	public function chargerUn($num, $async = false)
 	{
 			$this->_aff($num);
-			$j = $this->api('GET', '/issue/'.$num);
+		$j = $this->api('GET', '/issue/'.$num, null, $async);
+		if(!$async) $j = $this->_traiterRés($num, $j);
+		return $j;
+	}
+	
+	protected function _traiterRés($num, $j)
+	{
 			$j->fields->id = $j->id;
 			$j->fields->key = $j->key;
 			$j = $j->fields; // L'enrobage ne nous intéresse pas.
@@ -187,7 +222,7 @@ class JiraApi
 			$this->_lignesDiag[$num] = $this->_aff->nl - 1;
 	}
 	
-	public function api($méthode, $uri, $params = null)
+	public function api($méthode, $uri, $params = null, $async = false)
 	{
 		$enTêtes = array
 		(
@@ -205,13 +240,17 @@ class JiraApi
 			$o[CURLOPT_POSTFIELDS] = $params;
 		
 		// On utilise le multi_curl uniquement si nécessaire et disponible.
-		// Il pourrait fonctionner tout aussi bien sur les modes "simples" (sans le $this->mode >= 2),
+		// Il pourrait fonctionner tout aussi bien sur les modes "simples" (sans le if),
 		// mais ne sortons le grand jeu que si nécessaire.
-		if($this->mode >= 2 && class_exists('Dklab_SoapClient_Curl'))
+		if($this->mode >= 2 && $async)
 		{
-			$cm = new Dklab_SoapClient_Curl();
-			$clé = $cm->addRequest($o, null);
-			$r = $cm->getResult($clé);
+			if(!isset($this->_multicurl))
+				$this->_multicurl = new Dklab_SoapClient_Curl();
+			$clé = $this->_multicurl->addRequest($o, null);
+			if($async)
+				return $clé;
+			
+			$r = $this->_multicurl->getResult($clé);
 			// À FAIRE: un peu plus d'exploration du code retour?
 			$r = $r['body'];
 		}
@@ -224,6 +263,15 @@ class JiraApi
 		}
 		
 		return json_decode($r);
+	}
+	
+	public function _reçu($num, $r)
+	{
+		$r = $r['body'];
+		$j = json_decode($r);
+		$j = $this->_traiterRés($num, $j);
+		$àFaire = $this->_parcours->reçu([ $num => $j ]);
+		$this->_lancerAsync($this->_parcours->àFaire());
 	}
 }
 
