@@ -55,8 +55,7 @@ insert into n (t, nom) select t, 'Veuillez créer une entrée référentiel (de 
 -- Ménage des liens.
 -- À FAIRE: seulement ceux que nous alimentons, pas ceux créés en surimpression.
 
-delete from l where a in (select oidf from t_f);
-delete from l where b in (select oidf from t_f);
+delete from l where a in (select oidf from t_f) and b in (select oidf from t_f);
 
 insert into l (t, a, b)
 	select t_l.t, a.oidf, b.oidf from t_l join t_f a on t_l.a = a.num join t_f b on t_l.b = b.num;
