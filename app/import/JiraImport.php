@@ -19,7 +19,14 @@ TERMINE
 	
 	public function pousserFiche($fiche)
 	{
-		echo $this->sql->req("insert into t_f (id_ext, num, nom) values (%s, %s, %s);\n", $fiche->id, $fiche->key, $fiche->summary); // À FAIRE: s'assurer que nous en sommes la source.
+		$t =
+		[
+			'id_ext' => $fiche->id,
+			'num' => $fiche->key,
+			'nom' => $fiche->summary,
+		];
+		// À FAIRE: filtrer aussi par source avant d'écraser.
+		echo $this->_ponte('t_f', $t);
 	}
 	
 	public function pousserLiens($liens)
