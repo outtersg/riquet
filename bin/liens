@@ -28,7 +28,7 @@ analyserParametres()
 	then
 		metato="case when l.b is null then '' else '-' end||"
 		metatf="||case when l.b is null then '' else '-' end"
-		etats="left join (l join f e on e.id = l.b and e.nom in (`param --sql terminaux`)) on l.a = f.id and l.t = 'e'"
+		etats="left join (l join f e on e.id = l.b and e.nom in (`param --sql terminaux`)) on l.a = f.id and l.t = 'E'"
 	fi
 }
 

@@ -95,7 +95,7 @@ class Liens
 			$metato = "case when l.b is null then '' else '$metato' end||";
 			$metatf = "||case when l.b is null then '' else '$metatf' end";
 			$tsql = implode(',', array_map(array($this, 'sql'), $this->app->config['terminaux']));
-			$etats = "left join (l join f e on e.id = l.b and e.nom in ($tsql)) on l.a = f.id and l.t = 'e'";
+			$etats = "left join (l join f e on e.id = l.b and e.nom in ($tsql)) on l.a = f.id and l.t = 'E'";
 		}
 		
 		if($cols)

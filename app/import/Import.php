@@ -7,7 +7,7 @@ class Import
 	static $TYPE_FICHE_SUBST = array
 	(
 		'>' => 'p',
-		'e' => 'tÉtat',
+		'E' => 'tÉtat',
 		'p' => 'tPoids',
 		'o' => 's',
 	);

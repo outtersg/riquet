@@ -31,7 +31,7 @@ class ServiceNow
 		'subcategory'                => null,
 		'urgency'                    => '@p', // Poids / priorité
 		'priority'                   => '@p', // Poids / priorité
-		'state'                      => '@e', // État
+		'state'                      => '@E', // État
 		//'close_code'                 => null,
 	);
 }
