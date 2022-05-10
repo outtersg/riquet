@@ -99,11 +99,21 @@ class ExportDot
 	
 	protected function propsNœud($nœud)
 	{
-		return array
+		$r = array
 		(
 			'label' => '<<table border="0" cellborder="1" cellspacing="0"><tr><td>'.$nœud['num'].'</td></tr><tr><td>'.$this->jolibellé($nœud['nom']).'</td></tr></table>>',
 			'shape' => 'plain',
 		);
+		
+		$classe = [];
+		if(isset($nœud['nature']))
+			$classe[] = 't'.$this->attrEnClasse($nœud['nature']['num']);
+		if(isset($nœud['etat']))
+			$classe[] = 'e'.$this->attrEnClasse($nœud['etat']['num']);
+		if(count($classe))
+			$r['class'] = implode(' ', $classe);
+		
+		return $r;
 	}
 	
 	protected function jolibellé($libellé, $idéal = 32)
@@ -145,6 +155,11 @@ class ExportDot
 	{
 		if(isset(static::$Flèches[$type]))
 			return static::$Flèches[$type];
+	}
+	
+	public function attrEnClasse($attr)
+	{
+		return preg_replace('/[^a-z]/', '', strtolower(iconv('UTF-8', 'ASCII//TRANSLIT', $attr)));
 	}
 }
 
