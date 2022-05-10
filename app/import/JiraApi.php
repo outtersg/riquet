@@ -267,6 +267,8 @@ class JiraApi
 	
 	public function _reçu($num, $r)
 	{
+		if($r['http_code'] < 200 || $r['http_code'] >= 400)
+			throw new Exception('HTTP '.$r['http_code']);
 		$r = $r['body'];
 		$j = json_decode($r);
 		$j = $this->_traiterRés($num, $j);
