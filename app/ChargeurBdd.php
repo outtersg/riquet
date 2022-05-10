@@ -27,6 +27,11 @@ class ChargeurBdd
 	{
 		$this->app = $app;
 		$this->_cache = array();
+		
+		$rs = [];
+		foreach($this->app->bdd->req("select id, num, nom from n where t in ('T', 'E')") as $r)
+			$rs[$r['id']] = $r;
+		$this->_réf = $rs;
 	}
 	
 	public function idNums($nums)
@@ -42,7 +47,16 @@ class ChargeurBdd
 	{
 		$fiches = $this->app->bdd->req("select * from f where id in (%s)", $ids);
 		$ids = array_map(function($f) { return $f['id']; }, $fiches);
+		$fiches = array_map([ $this, '_enrichirFiche' ], $fiches);
 		return array_combine($ids, $fiches);
+	}
+	
+	public function _enrichirFiche($f)
+	{
+		foreach([ 'etat', 'nature' ] as $champ)
+			if($f[$champ])
+				$f[$champ] = $this->_réf[$f[$champ]];
+		return $f;
 	}
 	
 	/**
