@@ -56,7 +56,7 @@ class ChargeurBdd
 	{
 		$ids = array_keys($fiches);
 		$liens = array();
-		$liste = $this->app->bdd->req("select * from l where a in (%s) or b in (%s)", $ids, $ids);
+		$liste = $this->app->bdd->req("select * from l where (a in (%s) or b in (%s)) and t not in ('T', 'E')", $ids, $ids);
 		foreach($liste as $l)
 			$liens[$l['t']][$l['a']][$l['b']] = true;
 		return $liens;
