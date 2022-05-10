@@ -81,6 +81,7 @@ class Parcours
 			'notif' => method_exists($this->chargeur, 'notifRetenu'),
 		];
 		
+		$fusible = 0;
 		while(count($this->àFaire + $this->enCours))
 		{
 			// enCours mémorise les entrées déjà passées en àFaire, mais non encore traitées
@@ -89,6 +90,11 @@ class Parcours
 			// Notons que pour éviter une boucle infinie, le chargeur DOIT renvoyer un null pour ce qu'il a tenté de charger sans succès.
 			$nouveaux = $this->chargeur->charger($this->àFaire(), $this);
 			$this->reçu($nouveaux);
+			
+			// Quelques chargeurs oublient de nous prévenir quand leur recherche n'aboutit pas (ex.: nœud non accessible) pour certains des nœuds qu'on leur a demandé;
+			// on s'en prémunit en considérant qu'un chargeur qui tourne 10 cycles sans rien renvoyer n'a plus l'intention de rien faire.
+			if(count($nouveaux)) $fusible = 0;
+			else if(++$fusible >= 10) break;
 		}
 		
 		return array($this->faits, $this->liens);
