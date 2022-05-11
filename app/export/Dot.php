@@ -53,6 +53,7 @@ class ExportDot
 			$affn[] = $this->id($nœud).' '.$this->style($this->propsNœud($nœud));
 		$affn = array_map(function($x) { return "\t".$x."\n"; }, $affn);
 		$affl = array();
+		$oubliettes = array_fill_keys(array_keys($nœuds), 0);
 		foreach($liens as $type => $liensType)
 		{
 			$inv = in_array($type, static::$LiensInverses);
@@ -60,12 +61,25 @@ class ExportDot
 				foreach($cibles as $cible => $poids)
 				{
 					if(!isset($nœuds[$cible]) || !isset($nœuds[$source]))
-						/* À FAIRE: plutôt que de botter en touche, attacher un nœud factice indiquant le nombre de liens non représentés (+3 dans un cercle en pointillés par exemple, en same_rank). La difficulté étant de faire ce décompte par nœud, alors qu'on est tantôt cible, tantôt source. */
+					{
+						foreach([ $cible, $source ] as $présent)
+							if(isset($nœuds[$présent]))
+								++$oubliettes[$présent];
 						continue;
+					}
 					$idSource = $this->id($nœuds[$inv ? $cible : $source]);
 					$idCible = $this->id($nœuds[$inv ? $source : $cible]);
 					$affl[] = $idSource.' -> '.$idCible.' '.$this->style($this->propsLien($type, $poids));
 				}
+		}
+		// Infobulle représentant les nœuds non affichés.
+		$oubliettes = array_filter($oubliettes);
+		foreach($oubliettes as $id => $n)
+		{
+			$idaff = $this->id($nœuds[$id]);
+			$affl[] = $idaff.'_rab '.$this->style([ 'shape' => 'egg', 'style' => 'dashed', 'label' => '+ '.$n ]);
+			$affl[] = $idaff.' -> '.$idaff.'_rab '.$this->style([ 'arrowhead' => 'none', 'style' => 'dashed' ]);
+			$affl[] = "{ rank=same; $idaff; ${idaff}_rab; }";
 		}
 		$affl = array_map(function($x) { return "\t".$x."\n"; }, $affl);
 		return 'digraph'."\n".'{'."\n".implode('', $affn).implode('', $affl)."\n".'}';
