@@ -275,7 +275,10 @@ class JiraApi
 				$o['callback'] = $traitement;
 			
 			if(!isset($this->_multicurl))
+			{
 				$this->_multicurl = new Dklab_SoapClient_Curl();
+				$this->_multicurl->throttle(0x18);
+			}
 			$clé = $this->_multicurl->addRequest($o, null);
 			if($async)
 				return $clé;
