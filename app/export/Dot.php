@@ -41,8 +41,14 @@ class ExportDot
 	(
 		'v' => array('arrowtail' => 'odot', 'style' => 'bold', 'dir' => 'back'),
 		'<' => array('style' => 'tapered'),
-		'=' => array('arrowhead' => 'none', 'color' => 'black:black', 'style' => 'dashed'), // https://stackoverflow.com/a/6219948/1346819
-		':' => array('arrowhead' => 'none', 'style' => 'dashed'),
+		/* minlen=0 plutôt que constraint=false pour les liens d'équivalence.
+		 * En effet le constraint a pour effet indésirable (en plus de celui attendu, mettre les deux nœuds sur pied d'égalité)
+		 * de les dissocier complètement, le second allant se mettre à l'autre bout du graphe (à moins qu'un lien tierce les rapproche évidemment).
+		 * On voulait que ça transforme une relation père - fils en frère - frère, ça nous donne en fait deux parfaits inconnus.
+		 * Le minlen est moins coercitif que le rank=same (sur les nœuds), permettant au placeur de décaler si d'autres relations entrent en jeu.
+		 */
+		'=' => array('arrowhead' => 'none', 'color' => 'black:black', 'style' => 'dashed', 'minlen' => '0'), // https://stackoverflow.com/a/6219948/1346819
+		':' => array('arrowhead' => 'none', 'style' => 'dashed', 'minlen' => '0'),
 		'x' => array('color' => 'black:black', 'arrowhead' => 'tee'), // On pourrait aussi jouer avec le label "en attente de": ⌛,🛇
 	);
 	
