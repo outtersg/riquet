@@ -319,10 +319,30 @@ class JiraApi
 	
 	public function _reçu($num, $r)
 	{
+		if($r['http_code'] == 403)
+		{
+			$libellé = $r['body'] ? $r['body'] : 'Erreur HTTP '.$r['http_code'];
+			$this->_aff($num, self::NON, $libellé);
+			// À FAIRE: récupérer tout ça éventuellement du lien (inwardMachin), qui avait tout de même un peu d'info.
+			$j = (object)
+			[
+				'id' => '-'.$num,
+				'key' => $num,
+				'fields' => (object)
+				[
+					'summary' => $libellé,
+					'status' => (object)[ 'name' => 'Error' ],
+					'issuetype' => (object)[ 'name' => 'Error' ],
+				]
+			];
+		}
+		else
+		{
 		if($r['http_code'] < 200 || $r['http_code'] >= 400)
 			throw new Exception('HTTP '.$r['http_code']);
 		$r = $r['body'];
 		$j = json_decode($r);
+		}
 		$j = $this->_traiterRés($num, $j, true);
 		
 		return $r;
