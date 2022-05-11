@@ -97,14 +97,23 @@ class ExportDot
 		return '[ '.implode(', ', $r).' ]';
 	}
 	
-	const HTML_NŒUD = '<<table border="0" cellborder="1" cellspacing="0"><tr><td>@num</td></tr><tr><td>@nom</td></tr></table>>';
+	const HTML_NŒUD =
+	'<
+		<table border="0" cellborder="1" cellspacing="0" color="@foncé">
+			<tr><td bgcolor="@foncé"><font color="white">@num</font></td></tr>
+			<tr><td bgcolor="@clair">@nom</td></tr>
+		</table>
+	>';
 	
 	protected function propsNœud($nœud)
 	{
+		$couls = $this->couleurs($nœud);
 		$affNœud = strtr(self::HTML_NŒUD,
 		[
 			'@num' => $nœud['num'],
 			'@nom' => $this->jolibellé($nœud['nom']),
+			'@foncé' => $couls[0],
+			'@clair' => $couls[1],
 		]);
 		$r = array
 		(
@@ -121,6 +130,11 @@ class ExportDot
 			$r['class'] = implode(' ', $classe);
 		
 		return $r;
+	}
+	
+	public function couleurs($nœud)
+	{
+		return [ '#5f5f5f', '#ffffbf' ];
 	}
 	
 	protected function jolibellé($libellé, $idéal = 32)
