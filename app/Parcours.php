@@ -150,6 +150,9 @@ class Parcours
 					}
 				}
 			}
+		/* On cite aussi les nœuds rattachés à rien (sur lesquels on serait arrivés soit par mention explicite, soit par lien non symétrique),
+		 * car $liés sert (en plus du parcours des liens) à établir la liste des nœuds déjà explorés. */
+		$liés += array_fill_keys(array_keys($nouveaux), []);
 			
 			/* Nœuds à parcourir à la prochaine itération?
 			/* Blocage de propagation: si un nœud a trop de liens, il devient "bof", figurant encore dans le résultat, mais marquant un point d'arrêt à la propagation.
