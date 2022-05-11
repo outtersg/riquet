@@ -147,11 +147,11 @@ class JiraApi
 	{
 			$this->_aff($num);
 		$j = $this->api('GET', '/issue/'.$num, null, $async, $async ? [ $this, '_reçu', $num ] : null);
-		if(!$async) $j = $this->_traiterRés($num, $j);
+		if(!$async) $j = $this->_traiterRés($num, $j, false);
 		return $j;
 	}
 	
-	protected function _traiterRés($num, $j)
+	protected function _traiterRés($num, $j, $async = false)
 	{
 			$j->fields->id = $j->id;
 			$j->fields->key = $j->key;
@@ -168,10 +168,39 @@ class JiraApi
 				}
 		$j->_liens = $liens;
 		
+		// En plus des liens inter-fiches, on peut avoir des relations de parenté à fondre dans le même moule.
+		
+		if($j->issuetype->name == 'Epic')
+		{
+			// /!\ Bascule imminente sur parent: https://community.developer.atlassian.com/t/deprecation-of-the-epic-link-parent-link-and-other-related-fields-in-rest-apis-and-webhooks/54048
+			$r = $this->api('GET', '/search?fields=key&jql="Epic%20Link"='.$num, null, $async, [ $this, '_traiterRésFils', $num, $j, $async ]);
+			if($async) return; // Si $async, c'est _traiterRésFils qui appelera la suite des opérations.
+		}
+		
+		return $this->_finaliser($num, $j, $async);
+	}
+	
+	public function _finaliser($num, $j, $async)
+	{
 		// Poussage!
 		
 		$this->_sortie->pousserFiche($j);
+		
+		if($async)
+			$this->_postfiche($num, $j);
+		else
 		return $j;
+	}
+	
+	public function _traiterRésFils($num, $j, $async, $r)
+	{
+		$ro = json_decode($r['body']);
+		foreach($ro->issues as $fil)
+			$j->_liens['v'][$num][$fil->key] = 1;
+		
+		$this->_finaliser($num, $j, $async);
+		
+		return $r;
 	}
 	
 	public function notifRetenu($num, $j, $liés, $niveauRetenu)
@@ -236,14 +265,15 @@ class JiraApi
 		];
 		if($params)
 			$o[CURLOPT_POSTFIELDS] = $params;
-		if($traitement)
-			$o['callback'] = $traitement;
 		
 		// On utilise le multi_curl uniquement si nécessaire et disponible.
 		// Il pourrait fonctionner tout aussi bien sur les modes "simples" (sans le if),
 		// mais ne sortons le grand jeu que si nécessaire.
 		if($this->mode >= 2 && $async)
 		{
+			if($traitement)
+				$o['callback'] = $traitement;
+			
 			if(!isset($this->_multicurl))
 				$this->_multicurl = new Dklab_SoapClient_Curl();
 			$clé = $this->_multicurl->addRequest($o, null);
@@ -260,6 +290,14 @@ class JiraApi
 		curl_setopt_array($c, $o);
 		$r = curl_exec($c);
 		curl_close($c);
+			if($traitement)
+			{
+				$r0 = [ 'body' => $r ];
+				$params = array_merge(array_slice($traitement, 2), [ $r0 ]);
+				$traitement = array_slice($traitement, 0, 2);
+				call_user_func_array($traitement, $params);
+				$r = $r0['body'];
+			}
 		}
 		
 		return json_decode($r);
@@ -271,7 +309,13 @@ class JiraApi
 			throw new Exception('HTTP '.$r['http_code']);
 		$r = $r['body'];
 		$j = json_decode($r);
-		$j = $this->_traiterRés($num, $j);
+		$j = $this->_traiterRés($num, $j, true);
+		
+		return $r;
+	}
+	
+	public function _postfiche($num, $j)
+	{
 		$àFaire = $this->_parcours->reçu([ $num => $j ]);
 		$this->_lancerAsync($this->_parcours->àFaire());
 	}
