@@ -130,9 +130,7 @@ class JiraApi
 		while(($réps = $this->_multicurl->getAvailableResults()) !== null)
 			if(!count($réps))
 				usleep(10000);
-			else
-				foreach($réps as $clé => $rép)
-					$this->_reçu($this->_reqs[$clé], $rép);
+			// Le traitement des résultats est fait par callback, on ne renvoie donc rien ici.
 		
 		$this->_multicurl = null;
 		// On ne renvoie rien: on a notifié le Parcours (notre appelant, qui attend notre résultat) au fur et à mesure que l'on recevait les trames.
@@ -148,7 +146,7 @@ class JiraApi
 	public function chargerUn($num, $async = false)
 	{
 			$this->_aff($num);
-		$j = $this->api('GET', '/issue/'.$num, null, $async);
+		$j = $this->api('GET', '/issue/'.$num, null, $async, $async ? [ $this, '_reçu', $num ] : null);
 		if(!$async) $j = $this->_traiterRés($num, $j);
 		return $j;
 	}
@@ -222,7 +220,7 @@ class JiraApi
 			$this->_lignesDiag[$num] = $this->_aff->nl - 1;
 	}
 	
-	public function api($méthode, $uri, $params = null, $async = false)
+	public function api($méthode, $uri, $params = null, $async = false, $traitement = null)
 	{
 		$enTêtes = array
 		(
@@ -238,6 +236,8 @@ class JiraApi
 		];
 		if($params)
 			$o[CURLOPT_POSTFIELDS] = $params;
+		if($traitement)
+			$o['callback'] = $traitement;
 		
 		// On utilise le multi_curl uniquement si nécessaire et disponible.
 		// Il pourrait fonctionner tout aussi bien sur les modes "simples" (sans le if),
