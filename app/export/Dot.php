@@ -75,7 +75,10 @@ class ExportDot
 					}
 					$idSource = $this->id($nœuds[$inv ? $cible : $source]);
 					$idCible = $this->id($nœuds[$inv ? $source : $cible]);
-					$affl[] = $idSource.' -> '.$idCible.' '.$this->style($this->propsLien($type, $poids));
+					if(!($attrs = $this->propsLien($type, $poids))) $attrs = [];
+					if(($écartLien = $this->écartLien($type, $source, $cible, $nœuds)) > 1)
+						$attrs = [ 'minlen' => $écartLien ] + $attrs;
+					$affl[] = $idSource.' -> '.$idCible.' '.$this->style($attrs);
 				}
 		}
 		// Infobulle représentant les nœuds non affichés.
@@ -201,6 +204,20 @@ class ExportDot
 	{
 		if(isset(static::$Flèches[$type]))
 			return static::$Flèches[$type];
+	}
+	
+	protected function écartLien($type, $a, $b, $nœuds)
+	{
+		// Afin de mieux répartir les sous-nœuds d'un gros pépère, on établit une moyenne entre le logarithme des deux nœuds pris individuellement;
+		// si on avait fait le log de la somme, le "poids" des petits sous-nœuds aurait été absorbé par celui du gros,
+		// alors que là le petit sous-nœud a une chance de jouer sur la longueur du lien.
+		// Ainsi tous les sous-nœuds ne seront pas à la même distance du pépère (ce qui ferait un peigne),
+		// mais on observera une différence entre les petits sous-nœuds et les moyens.
+		$poids = 0;
+		foreach([ $a, $b ] as $id)
+			if(isset($nœuds[$id]['_nLiens']) && ($nLiens = $nœuds[$id]['_nLiens']) > 0)
+				$poids += log($nLiens, 3);
+		return round($poids);
 	}
 	
 	public function attrEnClasse($attr)
