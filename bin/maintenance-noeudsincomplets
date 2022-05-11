@@ -1,0 +1,9 @@
+#!/bin/sh
+# Liste les nœuds qui, dans un graphe généré pour ceux en paramètre, marqueraient un point d'arrêt au parcours (et donc devraient être ajoutés explicitement à la liste de paramètres, si on veut qu'ils apparaissent intégralement).
+
+noeudsIncomplets()
+{
+	php ./bin/affreseau.php "$@" | sed -e '/ -> /d' -e '/_rab \[.*/!d' -e 's///' -e 's/_/-/' -e 's/^[^A-Z]*//' -e "s/^/'/" -e "s/$/'/" | tr '\012' ,
+}
+
+sqlite3 var/riquet.sqlite3 "select num, nom from f where num in (`noeudsIncomplets "$@"`'youpi');" | tr '|' '\011'
