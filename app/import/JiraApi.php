@@ -37,6 +37,7 @@ class JiraApi
 	const RIEN = -99;
 	
 	protected $mode = 2;
+	protected $typesIgnorés = [];
 	
 	static $Couls = array
 	(
@@ -98,6 +99,12 @@ class JiraApi
 		$this->_sortie->fin();
 		
 		$this->_aff->affl(null, '');
+	}
+	
+	public function ignorerLié($lien)
+	{
+		if(in_array($lien->fields->issuetype->name, $this->typesIgnorés))
+			return true;
 	}
 	
 	public function charger($àFaire, $parcours)
@@ -162,6 +169,7 @@ class JiraApi
 			if(isset($j->issuelinks))
 				foreach($j->issuelinks as $lien)
 				{
+					if($this->ignorerLié(isset($lien->outwardIssue) ? $lien->outwardIssue : $lien->inwardIssue)) continue;
 				if(isset($lien->outwardIssue)) { $de = $num; $vers = $lien->outwardIssue->key; }
 				else { $vers = $num; $de = $lien->inwardIssue->key; }
 					$liens[$lien->type->inward][$de][$vers] = 1;
