@@ -97,11 +97,18 @@ class ExportDot
 		return '[ '.implode(', ', $r).' ]';
 	}
 	
+	const HTML_NŒUD = '<<table border="0" cellborder="1" cellspacing="0"><tr><td>@num</td></tr><tr><td>@nom</td></tr></table>>';
+	
 	protected function propsNœud($nœud)
 	{
+		$affNœud = strtr(self::HTML_NŒUD,
+		[
+			'@num' => $nœud['num'],
+			'@nom' => $this->jolibellé($nœud['nom']),
+		]);
 		$r = array
 		(
-			'label' => '<<table border="0" cellborder="1" cellspacing="0"><tr><td>'.$nœud['num'].'</td></tr><tr><td>'.$this->jolibellé($nœud['nom']).'</td></tr></table>>',
+			'label' => $affNœud,
 			'shape' => 'plain',
 		);
 		
