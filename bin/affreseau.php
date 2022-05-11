@@ -117,7 +117,7 @@ class AffRéseau
 			case 'dot':
 				require_once R.'/app/export/Dot.php';
 				$ce = $this->app->classe('ExportDot');
-				$e = new $ce();
+				$this->dot = $e = new $ce();
 				$dot = $e->exporter($ns[0], $ns[1]);
 				break;
 		}

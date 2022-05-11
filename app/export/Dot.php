@@ -132,6 +132,11 @@ class ExportDot
 		return $r;
 	}
 	
+	public function css()
+	{
+		return '';
+	}
+	
 	public function couleurs($nœud)
 	{
 		return [ '#5f5f5f', '#ffffbf' ];

@@ -1,6 +1,16 @@
 <!DOCTYPE html>
 <html>
-<head/>
+<head>
+	<style type="text/css">
+		/* Le CSS sur SVG nous permet de jouer sur les caractéristiques non dimensionnantes (couleur etc.) du SVG.
+		 * /!\ On n'est plus dans le pur SVG, on ne peut donc exporter le SVG tel quel (il a besoin du support de la page HTML avec son CSS).
+		 * Ceci dit attention, pour certains attributs Graphviz force, par exemple en mettant des fill="none" qui prennent le pas sur nos CSS.
+		 * Néanmoins si un jour on arrive à les faire sauter:
+		 * https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/SVG_and_CSS
+		 */
+		<?php echo $this->dot->css(); ?>
+	</style>
+</head>
 <meta charset="utf-8">
 <body>
 <!-- Largement issu de https://bl.ocks.org/magjac/4acffdb3afbc4f71b448a210b5060bca -->
