@@ -170,6 +170,9 @@ class JiraApi
 		
 		// En plus des liens inter-fiches, on peut avoir des relations de parenté à fondre dans le même moule.
 		
+		// La réciproque en premier:
+		if(isset($this->épopée) && isset($j->{$this->épopée}))
+			$j->_liens['v'][$j->{$this->épopée}][$num] = 1;
 		if($j->issuetype->name == 'Epic')
 		{
 			// /!\ Bascule imminente sur parent: https://community.developer.atlassian.com/t/deprecation-of-the-epic-link-parent-link-and-other-related-fields-in-rest-apis-and-webhooks/54048
