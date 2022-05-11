@@ -66,13 +66,21 @@ class ChargeurBdd
 	 *
 	 * @return array [ <type>: [ <id source>: [ <id cible>: true ] ] ]
 	 */
-	public function chargerLiens($fiches)
+	public function chargerLiens(& $fiches)
 	{
 		$ids = array_keys($fiches);
 		$liens = array();
 		$liste = $this->app->bdd->req("select * from l where (a in (%s) or b in (%s)) and t not in ('T', 'E')", $ids, $ids);
+		$nLiens = array_fill_keys($ids, 0);
 		foreach($liste as $l)
+		{
 			$liens[$l['t']][$l['a']][$l['b']] = true;
+			foreach([ 'a', 'b' ] as $col)
+				if(isset($nLiens[$l[$col]]))
+					++$nLiens[$l[$col]];
+		}
+		foreach($nLiens as $id => $n)
+			$fiches[$id]['_nLiens'] = $n;
 		return $liens;
 	}
 }
