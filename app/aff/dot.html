@@ -115,6 +115,16 @@
 var dotIndex = 0;
 var graphviz = d3.select("#graph").graphviz()
 	.tweenShapes(false).tweenPaths(false)
+	.transition(function () {
+		// Pas de transition si un seul affiché.
+		if(dots.length <= 1)
+			return;
+		var t = d3.transition("main").ease(d3.easeLinear);
+		// Pas de délai si le nouveau graphe a été ajouté a posteriori (sur clic on veut action immédiate, plutôt que le mode diaporama des graphes initiaux).
+		if(dotIndex < nAutos) t.delay(500);
+		t.duration(1500);
+		return t;
+	})
 	.logEvents(true)
 	.on("initEnd", render);
 
@@ -124,15 +134,20 @@ function render() {
 	graphviz
 		.renderDot(dot)
 		.on("end", function () {
-			dotIndex = (dotIndex + 1) % dots.length;
-			//render();
+			if(++dotIndex < nAutos)
+				render();
 		});
 }
 
-var dots =
-[
-	[ '<?php echo strtr($dot, array("'" => "\\'", "\n" => '\n')); ?>' ],
+var dots = [
+	<?php
+		if(!isset($dots)) $dots = [ $dot ];
+		foreach($dots as $dot)
+			echo "[ '".strtr($dot, array("'" => "\\'", "\n" => '\n'))."' ],\n";
+	?>
 ];
+
+var nAutos = dots.length;
 
 </script>
 </body>
