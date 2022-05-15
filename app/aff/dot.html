@@ -58,12 +58,18 @@
 			</radialGradient>
 		</defs>
 		<g id="pom" font-family="monospace">
+			<a class="plus">
 			<circle cx="-2.4em" cy="0" r="1ex" fill="url(#verdâtre)"></circle>
 			<text x="-2.4em" text-anchor="middle" y="0" dominant-baseline="middle" stroke="#007f00">+</text>
+			</a>
+			<a class="moins">
 			<circle cx="-1.2em" cy="0" r="1ex" fill="url(#jaunâtre)"></circle>
 			<text x="-1.2em" text-anchor="middle" y="0" dominant-baseline="middle" stroke="#7f3f00">-</text>
+			</a>
+			<a class="nenni">
 			<circle cx="0" cy="0" r="1ex" fill="url(#rougeâtre)"></circle>
 			<text x="0" text-anchor="middle" y="0" dominant-baseline="middle" stroke="#7f0000">x</text>
+			</a>
 		</g>
 	</svg>
 	<script type="text/javascript">
@@ -82,9 +88,17 @@
 				}
 				POM.outiller();
 			},
+			clic: function(e)
+			{
+				e.preventDefault();
+				var dest = e.target.closest('a').getAttribute('href');
+				window.history.pushState({ url: document.URL }, '', dest);
+				POM.charger(dest);
+			},
 			outiller: function(e)
 			{
 				if(!POM.pom) POM.init();
+				if(!POM.defs.parentElement) POM.svg.appendChild(POM.defs); // Suite à un clic().
 				if(!e) { delete POM.pointe; POM.pom.setAttribute('class', ''); return; }
 				if(e == POM.pointe) return;
 				POM.pointe = e;
@@ -92,6 +106,7 @@
 				var pos = e.getBBox();
 				var foncé = e.querySelector('polygon').getAttribute('fill');
 				var tPolice = e.querySelector('text').getAttribute('font-size');
+				var num = e.querySelector('text').innerHTML.trim();
 				
 				POM.pom.setAttribute('class', 'aff');
 				
@@ -101,14 +116,59 @@
 				var boutons = POM.pom.querySelectorAll('circle');
 				for(var i = boutons.length; --i >= 0;)
 					boutons[i].setAttribute('stroke', foncé);
+				POM.pom.querySelector('.plus').setAttribute('href', document.URL+' '+num);
+				POM.pom.querySelector('.moins').setAttribute('href', document.URL+' ='+num);
+				POM.pom.querySelector('.nenni').setAttribute('href', document.URL+' -'+num);
 			},
 			init: function()
 			{
 				POM.pom = document.getElementById('pom');
-				document.querySelector('#graph > svg').appendChild(document.getElementById('pom-defs'));
+				POM.defs = document.getElementById('pom-defs');
+				POM.svg = document.querySelector('#graph > svg');
+				POM.svg.appendChild(POM.defs);
+				
+				var boutons = POM.pom.querySelectorAll('a');
+				for(var i = boutons.length; --i >= 0;)
+					boutons[i].onclick = POM.clic;
+				
+				window.onpopstate = function(e)
+				{
+					e.preventDefault();
+					POM.charger(document.URL);
+				};
+			},
+			charger: function(url)
+			{
+				// La transition d3-graphviz et notre écouteur de souris ne font pas bon ménage.
+				// Commençons par le faire (le ménage) pour s'éviter des désagréments (mise en page avortée par exemple).
+				document.querySelector('#graph').removeEventListener('mouseover', POM.souris);
+				POM.outiller();
+				POM.svg.removeChild(POM.defs);
+				Chargeur.charger(url);
 			}
 		};
-		document.querySelector('#graph').addEventListener('mouseover', POM.souris);
+		
+		/*- Chargeur: récupérateur de graphes --------------------------------*/
+		
+		var Chargeur =
+		{
+			charger: function(url)
+			{
+				var req = new XMLHttpRequest();
+				req.onreadystatechange = function()
+				{
+					if(this.readyState == 4)
+						Chargeur._reçu(this.responseText);
+				};
+				req.open('GET', url+'&f=dot');
+				req.send();
+			},
+			_reçu: function(r)
+			{
+				dots[dotIndex = dots.length] = [ r ];
+				render();
+			}
+		};
 	</script>
 <script>
 
@@ -134,6 +194,7 @@ function render() {
 	graphviz
 		.renderDot(dot)
 		.on("end", function () {
+			document.querySelector('#graph').addEventListener('mouseover', POM.souris);
 			if(++dotIndex < nAutos)
 				render();
 		});
