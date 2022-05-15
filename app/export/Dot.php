@@ -31,7 +31,7 @@ class ExportDot
 	(
 		'v', // "descend de"
 		'<', // "est causé par"
-		'x', // "est bloqué par"
+		'×', // "est bloqué par"
 	);
 	
 	// Il y a un taré qui pour placer un point au milieu d'un arc demande à dot de tout placer, repère les arcs et recalcule où tombe son centre, rajoute en dur des bidules à cet endroit, et demande à nop2 (un rendeur qui ne fait que rendre, attendant tous les objets préplacés) de transformer en SVG.
