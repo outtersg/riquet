@@ -175,7 +175,11 @@
 var dotIndex = 0;
 var graphviz = d3.select("#graph").graphviz()
 	.tweenShapes(false).tweenPaths(false)
-	.transition(function () {
+	.logEvents(true)
+	.on("initEnd", render);
+
+var trans = function ()
+{
 		// Pas de transition si un seul affiché.
 		if(dots.length <= 1)
 			return;
@@ -184,13 +188,17 @@ var graphviz = d3.select("#graph").graphviz()
 		if(dotIndex < nAutos) t.delay(500);
 		t.duration(1500);
 		return t;
-	})
-	.logEvents(true)
-	.on("initEnd", render);
+};
 
 function render() {
 	var dotLines = dots[dotIndex];
 	var dot = dotLines.join('');
+	// On met en place les transitions à partir du second graphe.
+	if(trans && dots.length == 2)
+	{
+		graphviz.transition(trans);
+		delete trans;
+	}
 	graphviz
 		.renderDot(dot)
 		.on("end", function () {
