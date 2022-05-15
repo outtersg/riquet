@@ -215,7 +215,7 @@ class ExportDot
 		// mais on observera une différence entre les petits sous-nœuds et les moyens.
 		$poids = 0;
 		foreach([ $a, $b ] as $id)
-			if(isset($nœuds[$id]['_nLiens']) && ($nLiens = $nœuds[$id]['_nLiens']) > 0)
+			if(isset($nœuds[$id]['n_liens']) && ($nLiens = $nœuds[$id]['n_liens']) > 0)
 				$poids += log($nLiens, 3);
 		return round($poids);
 	}

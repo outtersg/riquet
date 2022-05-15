@@ -9,7 +9,16 @@ class JiraImport extends Import
 		echo $this->sql->req
 		(<<<TERMINE
 drop table if exists t_f;
-create temporary table t_f (oidf int, id_ext text, num text, nom text, type text, etat text);
+create temporary table t_f
+(
+	oidf int,
+	id_ext text,
+	num text,
+	nom text,
+	type text,
+	etat text,
+	n_liens integer
+);
 
 drop table if exists t_l;
 create temporary table t_l (t text, a text, b text);
@@ -25,6 +34,8 @@ TERMINE
 			'num' => $fiche->key,
 			'nom' => $fiche->summary,
 		];
+		if(isset($fiche->_nLiens))
+			$t['n_liens'] = $fiche->_nLiens;
 		// Les liens système:
 		$l =
 		[
@@ -59,7 +70,10 @@ update t_f set oidf = f.oid from f where oidf is null and f.id_ext = t_f.id_ext;
 -- Remplissage.
 
 update f
-set num = t_f.num, nom = t_f.nom
+set
+	num = t_f.num,
+	nom = t_f.nom,
+	n_liens = t_f.n_liens
 from t_f where t_f.oidf = f.oid;
 
 -- oidissage des liens.

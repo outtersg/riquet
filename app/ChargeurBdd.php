@@ -80,7 +80,8 @@ class ChargeurBdd
 					++$nLiens[$l[$col]];
 		}
 		foreach($nLiens as $id => $n)
-			$fiches[$id]['_nLiens'] = $n;
+			if(!isset($fiches[$id]['n_liens']) || $fiches[$id]['n_liens'] < $n)
+				$fiches[$id]['n_liens'] = $n;
 		return $liens;
 	}
 }

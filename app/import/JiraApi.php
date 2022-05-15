@@ -166,6 +166,7 @@ class JiraApi
 		
 		// On consolide ici les liens, tel que chargerLiens devra les renvoyer.
 		$liens = [];
+		$nLiens = 0;
 			if(isset($j->issuelinks))
 				foreach($j->issuelinks as $lien)
 				{
@@ -173,14 +174,19 @@ class JiraApi
 				if(isset($lien->outwardIssue)) { $de = $num; $vers = $lien->outwardIssue->key; }
 				else { $vers = $num; $de = $lien->inwardIssue->key; }
 					$liens[$lien->type->inward][$de][$vers] = 1;
+				++$nLiens;
 				}
 		$j->_liens = $liens;
+		$j->_nLiens = $nLiens;
 		
 		// En plus des liens inter-fiches, on peut avoir des relations de parenté à fondre dans le même moule.
 		
 		// La réciproque en premier:
 		if(isset($this->épopée) && isset($j->{$this->épopée}))
+		{
 			$j->_liens['v'][$j->{$this->épopée}][$num] = 1;
+			++$j->_nLiens;
+		}
 		if($j->issuetype->name == 'Epic')
 		{
 			// /!\ Bascule imminente sur parent: https://community.developer.atlassian.com/t/deprecation-of-the-epic-link-parent-link-and-other-related-fields-in-rest-apis-and-webhooks/54048
@@ -208,6 +214,7 @@ class JiraApi
 		$ro = json_decode($r['body']);
 		foreach($ro->issues as $fil)
 			$j->_liens['v'][$num][$fil->key] = 1;
+		$j->_nLiens += count($ro->issues);
 		
 		$this->_finaliser($num, $j, $async);
 		
