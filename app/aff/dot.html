@@ -114,6 +114,7 @@
 
 var dotIndex = 0;
 var graphviz = d3.select("#graph").graphviz()
+	.tweenShapes(false).tweenPaths(false)
 	.logEvents(true)
 	.on("initEnd", render);
 
