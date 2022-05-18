@@ -6,6 +6,7 @@
 		
 		@media print
 		{
+			#ducalme, #ducalme.aff,
 			#outils,
 			#graph { display: none !important; }
 		}
@@ -34,6 +35,17 @@
 			padding: 0.2ex;
 			border-radius: 0.2ex;
 			margin-right: 0.2ex;
+		}
+		#ducalme.aff { display: block; }
+		#ducalme
+		{
+			display: none;
+			position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
+			border-radius: 1ex;
+			border: 1px solid #3f1f00;
+			padding: 1ex;
+			background: #ffdf7f;
+			font-size: 120%;
 		}
 		
 		/*- SVG --------------------------------------------------------------*/
@@ -109,6 +121,19 @@
 		</g>
 	</svg>
 	<script type="text/javascript">
+		var DuCalme =
+		{
+			aff: function(message)
+			{
+				var ducalme = document.getElementById('ducalme');
+				ducalme.querySelector('span').childNodes[0].nodeValue = message;
+				ducalme.setAttribute('class', 'aff');
+			},
+			fini: function()
+			{
+				document.getElementById('ducalme').removeAttribute('class');
+			}
+		};
 		/*- PlusOuMoins: cases d'expansion / fermeture -----------------------*/
 		var POM =
 		{
@@ -379,6 +404,9 @@ var nAutos = dots.length;
 			<span onclick="javascript:Impr.imprimer('A3');">🖶 A3</span>
 			<!-- À FAIRE: prévisu: un <use> en taille réduite avec surimpression sommaire des traits de découpe. -->
 		</div>
+	</div>
+	<div id="ducalme">
+		<span>En attente…</span>
 	</div>
 </body>
 </html>
