@@ -2,6 +2,15 @@
 <html>
 <head>
 	<style type="text/css">
+		/*- Outillage --------------------------------------------------------*/
+		
+		@media print
+		{
+			#graph { display: none !important; }
+		}
+		
+		/*- SVG --------------------------------------------------------------*/
+		
 		/* Le CSS sur SVG nous permet de jouer sur les caractéristiques non dimensionnantes (couleur etc.) du SVG.
 		 * /!\ On n'est plus dans le pur SVG, on ne peut donc exporter le SVG tel quel (il a besoin du support de la page HTML avec son CSS).
 		 * Ceci dit attention, pour certains attributs Graphviz force, par exemple en mettant des fill="none" qui prennent le pas sur nos CSS.
@@ -169,6 +178,124 @@
 				render();
 			}
 		};
+		
+		/*- Impr: impression -------------------------------------------------*/
+		
+		var Impr =
+		{
+			init: function()
+			{
+				// Cf. note dans imprimer().
+				//window.onbeforeprint = Impr.avant;
+				window.addEventListener('keydown', Impr.intercepter);
+				window.onafterprint = Impr.après;
+			},
+			intercepter: function(e)
+			{
+				// https://stackoverflow.com/questions/18843936/how-to-disable-the-ctrlp-using-javascript-or-jquery/30707879#30707879
+				if((e.ctrlKey || e.metaKey) && (e.key == "p" || e.charCode == 16 || e.charCode == 112 || e.keyCode == 80))
+				{
+					e.cancelBubble = true;
+					e.preventDefault();
+					e.stopImmediatePropagation();
+					Impr.imprimer();
+				}
+			},
+			imprimer: function(format)
+			{
+				// Firefox (au moins) a un souci: le SVG créé dans l'onbeforeprint n'est pas encore rendu sur l'aperçu d'impression, ce qui donne une page blanche.
+				// https://stackoverflow.com/questions/41389281/redrawing-a-d3-svg-chart-for-printing
+				// On génère donc notre version mosaïque du SVG, et on ne déclenche l'impression que 500 ms après.
+				Impr.avant(format);
+				window.setTimeout(window.print, 500);
+			},
+			dim: function(format)
+			{
+				var f;
+				if((f = /^A([0-5])([hvp]?)$/.exec(format)))
+				{
+					var rac2 = Math.sqrt(2);
+					var grand = Math.sqrt(rac2) * 100.0; // Feuilles Ax: le grand côté fait √2 le petit, et la surface de l'A0 est d'1m2.
+					if(f[1] > 0)
+						grand /= Math.pow(rac2, 0+f[1]);
+					var petit = grand / rac2;
+					
+					return f[2] == '' || f[2] == 'v' ? { l: petit, h: grand } : { l: grand, h: petit };
+				}
+				else
+					alert('Format '+format+' inconnu');
+			},
+			avant: function(format)
+			{
+				if(!format) format = 'A3h';
+				
+				/*- Dimensions -*/
+				
+				var dim = Impr.dim(format); // À FAIRE: peut-on suggérer à l'impression le format de papier à utiliser?
+				var marge = 1.0; // En centimètres; pour simplifier, marge et chevauchement sont considérés identiques.
+				var chevauchement = marge;
+				
+				var ppc = 96 / 2.54; // Points par centimètres = points par pouce / pouces par centimètre.
+				
+				// On convertit tout ça en pixels:
+				dim.l *= ppc;
+				dim.h *= ppc;
+				marge *= ppc;
+				chevauchement *= ppc;
+				
+				/*- Position -*/
+				
+				var g = document.getElementById('graph0');
+				var t = g.getBoundingClientRect(); // Taille du SVG.
+				var dx, dy;
+				// Sur chaque feuille, on perd les deux marges + le chevauchement avec la feuille suivante; sauf la dernière feuille qui n'est chevauchée par personne, donc retirons cette marge de la taille de l'image pour savoir combien de feuilles seront nécessaires.
+				var nl = Math.ceil((t.width - chevauchement) / (dx = dim.l - 2 * marge - chevauchement));
+				var nh = Math.ceil((t.height - chevauchement) / (dy = dim.h - 2 * marge - chevauchement));
+				
+				/*- Au boulot! -*/
+				
+				var x, y;
+				for(y = -1; ++y < nh;)
+					for(x = -1; ++x < nl;)
+					{
+						Impr.divPour(g, x * dx, y * dy, dx + chevauchement, dy + chevauchement);
+					}
+				
+				// À FAIRE: détecter les feuilles vides pour ne pas les imprimer.
+			},
+			après: function()
+			{
+				var i, div;
+				for(i = Impr.mosaïques.length; --i >= 0;)
+				{
+					div = Impr.mosaïques[i];
+					div.parentElement.removeChild(div);
+					Impr.mosaïques.pop();
+				}
+console.log(Impr.mosaïques.length);
+			},
+			divPour: function(source, x, y, l, h)
+			{
+				var enSvg = 'http://www.w3.org/2000/svg';
+				var div = document.createElement('div');
+				div.setAttribute('style', 'width: '+l+'px; height: '+h+'px;');
+div.setAttribute('style', 'border: 3px solid black; width: '+l+'px; height: '+h+'px;');
+				var svg = document.createElementNS(enSvg, 'svg');
+				svg.setAttributeNS(null, 'width', l+'px');
+				svg.setAttributeNS(null, 'height', h+'px');
+				var g = document.createElementNS(enSvg, 'use');
+				g.setAttributeNS(null, 'href', '#'+source.id);
+				g.setAttributeNS(null, 'transform', 'translate('+(-x)+', '+(-y)+')');
+				svg.appendChild(g);
+				div.appendChild(svg);
+				document.body.appendChild(div);
+				Impr.mosaïques.push(div);
+				return div;
+			},
+			mosaïques: []
+		};
+		
+		Impr.init();
 	</script>
 <script>
 
