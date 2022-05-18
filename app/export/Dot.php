@@ -91,7 +91,13 @@ class ExportDot
 			$affl[] = "{ rank=same; $idaff; ${idaff}_rab; }";
 		}
 		$affl = array_map(function($x) { return "\t".$x."\n"; }, $affl);
-		return 'digraph'."\n".'{'."\n".implode('', $affn).implode('', $affl)."\n".'}';
+		// NOTE: police
+		// /!\ Le HTML-like label accepte des polices que ne connaît pas le graphe, ce qui pose des problèmes de dimensions.
+		// Ainsi, si le label=<> utilise une police "sans-serif", il est reconnu et le SVG est rendu avec une police adéquate MAIS les dimensions des cases sont calculées en fonction de la police du graphe (Times), et le m étant plus tassé en Times qu'en sans-serif, le libellé dépasse de la boîte.
+		// Il semble cependant que la police Helvetica soit reconnue de la même manière sur le graphe que dans le HTML-like label.
+		// N.B.: cela ne pose problème que sur la police, pas sur la taille. Ainsi un <font fontface="sans-serif" point-size="24.0"> calculera une boîte pour du Times 24.
+		$pol = 'node [ fontname="Helvetica" ]'."\n";
+		return 'digraph'."\n".'{'."\n".$pol.implode('', $affn).implode('', $affl)."\n".'}';
 	}
 	
 	/**
