@@ -255,6 +255,7 @@
 			},
 			imprimer: function(format)
 			{
+				// À FAIRE: compenser le zoom.
 				DuCalme.aff('Préparation de l\'impression…');
 				window.setTimeout(function()
 				{
@@ -289,6 +290,7 @@
 				/*- Dimensions -*/
 				
 				var dim = Impr.dim(format); // À FAIRE: peut-on suggérer à l'impression le format de papier à utiliser?
+				var échelle = 0.5; // Graphviz nous sort des trucs bien trop gros.
 				var marge = 1.0; // En centimètres; pour simplifier, marge et chevauchement sont considérés identiques.
 				var chevauchement = marge;
 				
@@ -306,8 +308,8 @@
 				var t = g.getBoundingClientRect(); // Taille du SVG.
 				var dx, dy;
 				// Sur chaque feuille, on perd les deux marges + le chevauchement avec la feuille suivante; sauf la dernière feuille qui n'est chevauchée par personne, donc retirons cette marge de la taille de l'image pour savoir combien de feuilles seront nécessaires.
-				var nl = Math.ceil((t.width - chevauchement) / (dx = dim.l - 2 * marge - chevauchement));
-				var nh = Math.ceil((t.height - chevauchement) / (dy = dim.h - 2 * marge - chevauchement));
+				var nl = Math.ceil((t.width * échelle - chevauchement) / (dx = dim.l - 2 * marge - chevauchement));
+				var nh = Math.ceil((t.height * échelle - chevauchement) / (dy = dim.h - 2 * marge - chevauchement));
 				
 				/*- Au boulot! -*/
 				
@@ -315,7 +317,7 @@
 				for(y = -1; ++y < nh;)
 					for(x = -1; ++x < nl;)
 					{
-						Impr.divPour(g, x * dx, y * dy, dx + chevauchement, dy + chevauchement);
+						Impr.divPour(g, x * dx, y * dy, dx + chevauchement, dy + chevauchement, échelle);
 					}
 				
 				// À FAIRE: détecter les feuilles vides pour ne pas les imprimer.
@@ -331,7 +333,7 @@
 				}
 console.log(Impr.mosaïques.length);
 			},
-			divPour: function(source, x, y, l, h)
+			divPour: function(source, x, y, l, h, échelle)
 			{
 				var enSvg = 'http://www.w3.org/2000/svg';
 				var div = document.createElement('div');
@@ -342,7 +344,7 @@ div.setAttribute('style', 'border: 3px solid black; width: '+l+'px; height: '+h+
 				svg.setAttributeNS(null, 'height', h+'px');
 				var g = document.createElementNS(enSvg, 'use');
 				g.setAttributeNS(null, 'href', '#'+source.id);
-				g.setAttributeNS(null, 'transform', 'translate('+(-x)+', '+(-y)+')');
+				g.setAttributeNS(null, 'transform', 'translate('+(-x)+', '+(-y)+') scale('+échelle+')');
 				svg.appendChild(g);
 				div.appendChild(svg);
 				document.body.appendChild(div);
