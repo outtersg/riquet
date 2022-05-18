@@ -40,7 +40,7 @@ class ExportDot
 	public static $Flèches = array
 	(
 		'v' => array('arrowtail' => 'odot', 'style' => 'bold', 'dir' => 'back'),
-		'<' => array('style' => 'tapered'),
+		'<' => array('arrowhead' => 'normalnormal'), // Plutôt que tapered, qui est très joli mais, constitué de Bézier, subit des déformations monstrueuses durant les transitions entre deux versions du graphe.
 		/* minlen=0 plutôt que constraint=false pour les liens d'équivalence.
 		 * En effet le constraint a pour effet indésirable (en plus de celui attendu, mettre les deux nœuds sur pied d'égalité)
 		 * de les dissocier complètement, le second allant se mettre à l'autre bout du graphe (à moins qu'un lien tierce les rapproche évidemment).
