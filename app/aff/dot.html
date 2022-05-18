@@ -6,7 +6,34 @@
 		
 		@media print
 		{
+			#outils,
 			#graph { display: none !important; }
+		}
+		#outils .coucou, #outils:hover .caché { display: none; }
+		#outils:hover .coucou, #outils .caché { display: block; }
+		#outils
+		{
+			font-size: 150%;
+			position: fixed;
+			bottom: 1em;
+			left: 1em;
+			cursor: pointer;
+		}
+		#outils .caché
+		{
+			background: #3f1f00;
+			color: #ffffff;
+			padding: 0 0.5ex 0 0.5ex;
+			border-radius: 0.5em;
+		}
+		#outils .coucou span
+		{
+			border: 1px solid #3f1f00;
+			color: #3f1f00;
+			background: #ffdf7f;
+			padding: 0.2ex;
+			border-radius: 0.2ex;
+			margin-right: 0.2ex;
 		}
 		
 		/*- SVG --------------------------------------------------------------*/
@@ -346,6 +373,11 @@ var dots = [
 var nAutos = dots.length;
 
 </script>
+	<div id="outils">
+		<div class="caché">+</div>
+		<div class="coucou">
+		</div>
+	</div>
 </body>
 </html>
 
