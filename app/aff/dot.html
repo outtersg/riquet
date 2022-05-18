@@ -331,14 +331,13 @@
 					div.parentElement.removeChild(div);
 					Impr.mosaïques.pop();
 				}
-console.log(Impr.mosaïques.length);
 			},
 			divPour: function(source, x, y, l, h, échelle)
 			{
 				var enSvg = 'http://www.w3.org/2000/svg';
 				var div = document.createElement('div');
 				div.setAttribute('style', 'width: '+l+'px; height: '+h+'px;');
-div.setAttribute('style', 'border: 3px solid black; width: '+l+'px; height: '+h+'px;');
+				//div.setAttribute('style', 'border: 3px solid black; '+div.getAttribute('style'));
 				var svg = document.createElementNS(enSvg, 'svg');
 				svg.setAttributeNS(null, 'width', l+'px');
 				svg.setAttributeNS(null, 'height', h+'px');
