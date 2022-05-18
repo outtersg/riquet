@@ -255,11 +255,16 @@
 			},
 			imprimer: function(format)
 			{
+				DuCalme.aff('Préparation de l\'impression…');
+				window.setTimeout(function()
+				{
 				// Firefox (au moins) a un souci: le SVG créé dans l'onbeforeprint n'est pas encore rendu sur l'aperçu d'impression, ce qui donne une page blanche.
 				// https://stackoverflow.com/questions/41389281/redrawing-a-d3-svg-chart-for-printing
 				// On génère donc notre version mosaïque du SVG, et on ne déclenche l'impression que 500 ms après.
 				Impr.avant(format);
+				DuCalme.fini();
 				window.setTimeout(window.print, 500);
+				}, 0);
 			},
 			dim: function(format)
 			{
