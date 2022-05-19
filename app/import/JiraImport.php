@@ -4,6 +4,27 @@ require_once dirname(__FILE__).'/Import.php';
 
 class JiraImport extends Import
 {
+	protected function _req($sql)
+	{
+		if(isset($this->bdd))
+		{
+			if(!isset($this->sqleur))
+			{
+				require_once R.'/vendor/gui/sqleur/sql2csv.php';
+				$this->sqleur = new JoueurSqlPdo($this->bdd);
+				$this->sqleur->bavard = false;
+			}
+			$this->sqleur->decoupe($sql);
+		}
+		
+		if(!isset($this->bdd) || (isset($this->aff) && $this->aff))
+		{
+			echo $sql;
+			if(substr($sql, -1) != "\n")
+				echo "\n";
+		}
+	}
+	
 	public function début()
 	{
 		echo $this->sql->req
