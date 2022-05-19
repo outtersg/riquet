@@ -27,7 +27,7 @@ class JiraImport extends Import
 	
 	public function début()
 	{
-		echo $this->sql->req
+		$this->_req($this->sql->req
 		(<<<TERMINE
 drop table if exists t_f;
 create temporary table t_f
@@ -44,7 +44,7 @@ create temporary table t_f
 drop table if exists t_l;
 create temporary table t_l (t text, a text, b text);
 TERMINE
-		);
+		));
 	}
 	
 	public function pousserFiche($fiche)
@@ -64,9 +64,9 @@ TERMINE
 			'E' => $fiche->status->name, // N.B.: $fiche->status->statusCategory->key est intéressant aussi, car il indique l'état macro (créé, en cours, ou terminé).
 		];
 		// À FAIRE: filtrer aussi par source avant d'écraser.
-		echo $this->_ponte('t_f', $t);
+			$this->_req($this->_ponte('t_f', $t));
 		foreach($l as $type => $nom)
-			echo $this->_ponte('t_l', [ 't' => $type, 'a' => $fiche->key, 'b' => $nom ]);
+				$this->_req($this->_ponte('t_l', [ 't' => $type, 'a' => $fiche->key, 'b' => $nom ]));
 	}
 	
 	public function pousserLiens($liens)
@@ -74,12 +74,12 @@ TERMINE
 		foreach($liens as $t => $liensType)
 			foreach($liensType as $vers => $des)
 				foreach($des as $de => $rien)
-					echo $this->sql->req("insert into t_l (t, a, b) values (%s, %s, %s);\n", $t, $de, $vers);
+						$this->_req($this->sql->req("insert into t_l (t, a, b) values (%s, %s, %s);\n", $t, $de, $vers));
 	}
 	
 	public function fin()
 	{
-		echo $this->sql->req
+		$this->_req($this->sql->req
 		(<<<TERMINE
 -- Création des fiches.
 
@@ -118,7 +118,7 @@ insert into l (t, a, b)
 	and not exists(select 1 from l le where (le.t, le.a, le.b) = (t_l.t, a.oidf, r.id))
 ;
 TERMINE
-		);
+		));
 	}
 }
 
