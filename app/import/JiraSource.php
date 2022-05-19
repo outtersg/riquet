@@ -13,6 +13,7 @@ $cji = $app->classe('JiraImport');
 		if(isset($GLOBALS['argv']))
 fprintf(STDERR, "Extraction via [ %s -> %s ]\n", $classe, $cji);
 $ji = new $cji();
+		$ji->bdd = $app->bdd;
 $j = new $classe($app->config['jira'], $app->config['jira.idmdp'], $ji);
 		$this->import = $j;
 	}

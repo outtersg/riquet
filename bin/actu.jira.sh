@@ -36,7 +36,4 @@ _actu()
 	
 	php "$SCRIPTS/../app/maj.php"
 	php "$SCRIPTS/actugraphe.php" -t jira $optimport "$@" > "$sql"
-	
-	titre "Intégration des Jira à la base"
-	sqlite3 "$BDD" < "$sql"
 }
