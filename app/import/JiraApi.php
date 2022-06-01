@@ -48,11 +48,12 @@ class JiraApi
 		self::RIEN => '90',
 	);
 	
-	public function __construct($url, $idMdp, $sortie)
+	public function __construct($url, $idMdp, $sortie, $liensAuFurEtÀMesure = false)
 	{
 		$this->_racine = $url;
 		$this->_idMdp = $idMdp;
 		$this->_sortie = $sortie;
+		$this->_lafeàm = $liensAuFurEtÀMesure;
 	}
 	
 	public function lancer($params)
@@ -362,6 +363,8 @@ class JiraApi
 	public function _postfiche($num, $j)
 	{
 		$àFaire = $this->_parcours->reçu([ $num => $j ]);
+		if($this->_lafeàm)
+			$this->_sortie->pousserLiens($this->_parcours->liens);
 		$this->_lancerAsync($this->_parcours->àFaire());
 	}
 }
