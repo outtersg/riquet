@@ -181,9 +181,15 @@ class AffRéseau
 	
 	public function aff($params)
 	{
+		// En mode HTML + rafraîchissement, la page se charge initialement sans graphe, afin d'aller au plus vite pour afficher une alerte "Rafraîchissement en cours" pendant qu'on fait nos calculs.
+		if($params['f'] == 'html' && isset($params['r']))
+			$nls = [];
+		else
+		{
 		$nls = $this->_nœudsEtLiens($params);
 		
 		$ns = $nls[0];
+		}
 		
 		/* Calcul des éléments graphiques */
 		
@@ -191,15 +197,14 @@ class AffRéseau
 		{
 			case 'html':
 			case 'dot':
-				$dots = [];
-				if(isset($ns[0]) && count($ns[0]))
-				{
 				require_once R.'/app/export/Dot.php';
 				$ce = $this->app->classe('ExportDot');
 				$this->dot = $e = new $ce();
+				
+				$dots = [];
+				if(isset($ns[0]) && count($ns[0]))
 					$dots[] =
 				$dot = $e->exporter($ns[0], $ns[1]);
-				}
 				break;
 		}
 		

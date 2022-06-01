@@ -215,6 +215,9 @@
 		{
 			charger: function(url)
 			{
+				// Si le chargement risque d'être long, on prévient.
+				if(Chargeur.exprAvecRaf.test(url))
+					DuCalme.aff('Rafraîchissement du graphe…');
 				var req = new XMLHttpRequest();
 				req.onreadystatechange = function()
 				{
@@ -226,9 +229,11 @@
 			},
 			_reçu: function(r)
 			{
+				DuCalme.fini();
 				dots[dotIndex = dots.length] = [ r ];
 				render();
-			}
+			},
+			exprAvecRaf: /[?&][rR]([=&]|$)/
 		};
 		
 		/*- Impr: impression -------------------------------------------------*/
@@ -376,6 +381,7 @@ var trans = function ()
 };
 
 function render() {
+	if(!dots.length) return;
 	var dotLines = dots[dotIndex];
 	var dot = dotLines.join('');
 	// On met en place les transitions à partir du second graphe.
@@ -414,6 +420,11 @@ var nAutos = dots.length;
 	<div id="ducalme">
 		<span>En attente…</span>
 	</div>
+	<script type="text/javascript">
+		if(nAutos == 0)
+			Chargeur.charger(document.URL);
+	</script>
+
 </body>
 </html>
 
