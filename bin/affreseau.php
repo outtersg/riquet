@@ -126,6 +126,24 @@ class AffRéseau
 	const CACHE = 0x1;
 	const SOURCE = 0x2;
 	
+	public function tracer($num, $rés = null, $détail = null)
+	{
+		if(!isset($this->_tracerInitialisé))
+		{
+			header('X-Accel-Buffering: no'); // https://stackoverflow.com/questions/4870697/php-flush-that-works-even-in-nginx/23171377#23171377
+			$this->_tracerInitialisé = 1;
+			$this->_faits = $this->_àFaire = [];
+		}
+		
+		if(!$rés)
+			$this->_àFaire[$num] = 1;
+		else
+			$this->_faits[$num] = 1;
+		
+		echo '// ### '.count($this->_faits).' / '.count($this->_àFaire)."\n";
+		flush();
+	}
+	
 	protected function _nœudsEtLiens($params)
 	{
 		// 3 modes:
@@ -156,6 +174,9 @@ class AffRéseau
 			
 			$cs = $this->app->classe('Source');
 			$s = new $cs($this->app, !($mode & self::CACHE));
+			// Les formats destinés à être embarqués dans une page HTML, si l'on est bien en mode web (pas de STDERR), bénéficient d'un suivi façon WebSocket du pauvre.
+			if(!defined('STDERR') && $params['f'] == 'dot')
+				$s->import->traceur = $this;
 			$s->import->faire($paramsRaf['+'], 5, $paramsRaf['-'], $paramsRaf['=']);
 			
 			if(!($mode & self::CACHE))
