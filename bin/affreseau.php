@@ -155,8 +155,11 @@ class AffRéseau
 			require_once R.'/app/import/Source.php';
 			
 			$cs = $this->app->classe('Source');
-			$s = new $cs($this->app);
+			$s = new $cs($this->app, !($mode & self::CACHE));
 			$s->import->faire($paramsRaf['+'], 5, $paramsRaf['-'], $paramsRaf['=']);
+			
+			if(!($mode & self::CACHE))
+				$ns = $s->persisteur->mém();
 		}
 		
 		if($mode & self::CACHE)
