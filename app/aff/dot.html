@@ -221,6 +221,15 @@
 				var req = new XMLHttpRequest();
 				req.onreadystatechange = function()
 				{
+					if(this.readyState == 3 || this.readyState == 4)
+						if(this.responseText)
+						{
+							var prog, dern;
+							while((prog = Chargeur.exprProgression.exec(this.responseText, 'g')))
+								dern = prog[2];
+							if(dern)
+								DuCalme.aff('Rafraîchissement du graphe…<br/><div>'+dern+'</div>');
+						}
 					if(this.readyState == 4)
 						Chargeur._reçu(this.responseText);
 				};
@@ -233,7 +242,8 @@
 				dots[dotIndex = dots.length] = [ r ];
 				render();
 			},
-			exprAvecRaf: /[?&][rR]([=&]|$)/
+			exprAvecRaf: /[?&][rR]([=&]|$)/,
+			exprProgression: /(^|\n)\/\/ ### (.*)/gm
 		};
 		
 		/*- Impr: impression -------------------------------------------------*/
