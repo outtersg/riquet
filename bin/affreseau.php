@@ -96,8 +96,10 @@ class AffRéseau
 		return $groupes + array('f' => 'dot');
 	}
 	
-	public function aff($params)
+	protected function _nœudsEtLiens($params)
 	{
+		if(!count($params['+'])) return [];
+		
 		require_once R.'/app/ChargeurBdd.php';
 		require_once R.'/app/Parcours.php';
 		
@@ -108,6 +110,15 @@ class AffRéseau
 		$p = new $cp($c);
 
 		$ns = $p->parcourir($params['+'], $params['-'], $params['=']);
+		
+		return [ $ns ];
+	}
+	
+	public function aff($params)
+	{
+		$nls = $this->_nœudsEtLiens($params);
+		
+		$ns = $nls[0];
 		
 		/* Calcul des éléments graphiques */
 		
