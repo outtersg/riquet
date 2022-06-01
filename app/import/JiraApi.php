@@ -250,6 +250,11 @@ class JiraApi
 	
 	protected function _aff($num, $rés = null, $détail = null)
 	{
+		if(isset($this->traceur))
+			$this->traceur->tracer($num, $rés, $détail);
+		
+		// À FAIRE: ce qui suit devrait aller dans un traceur générique d'imports.
+		
 		if(!isset($this->_aff)) return;
 		
 		if($détail === null && $rés)
