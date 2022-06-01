@@ -4,6 +4,12 @@ require_once dirname(__FILE__).'/Import.php';
 
 class JiraImport extends Import
 {
+	public function __construct($mém = false)
+	{
+		parent::__construct();
+		$this->_mém = $mém;
+	}
+	
 	protected function _req($sql)
 	{
 		if(isset($this->bdd))
@@ -63,18 +69,38 @@ TERMINE
 			'T' => $fiche->issuetype->name,
 			'E' => $fiche->status->name, // N.B.: $fiche->status->statusCategory->key est intéressant aussi, car il indique l'état macro (créé, en cours, ou terminé).
 		];
+		if($this->_mém)
+			$this->fiches[$fiche->key] = $t;
+		else
+		{
 		// À FAIRE: filtrer aussi par source avant d'écraser.
 			$this->_req($this->_ponte('t_f', $t));
 		foreach($l as $type => $nom)
 				$this->_req($this->_ponte('t_l', [ 't' => $type, 'a' => $fiche->key, 'b' => $nom ]));
+		}
 	}
 	
 	public function pousserLiens($liens)
 	{
+		if($this->_mém)
+		{
+			$corrLiens = [];
+			foreach($this->_mém->req("select * from n where t = 'L'") as $cl)
+				$corrLiens[$cl['nom']] = $cl['num'];
+			$this->liens = [];
+			foreach($liens as $t => $liensT)
+				$this->liens[isset($corrLiens[$t]) ? $corrLiens[$t] : $t] = $liensT;
+		}
+		else
 		foreach($liens as $t => $liensType)
 			foreach($liensType as $vers => $des)
 				foreach($des as $de => $rien)
 						$this->_req($this->sql->req("insert into t_l (t, a, b) values (%s, %s, %s);\n", $t, $de, $vers));
+	}
+	
+	public function mém()
+	{
+		return [ $this->fiches, $this->liens ];
 	}
 	
 	public function fin()
