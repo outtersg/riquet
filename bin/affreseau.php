@@ -65,6 +65,18 @@ class AffRéseau
 			$groupes[$signe ? $signe : '+'][] = $r[2][$pos];
 		}
 		
+		if(isset($params['R']))
+			$groupes['r'] = true;
+		else if(isset($params['r']))
+		{
+			if(empty($params['r']))
+				$groupes['r'] = true;
+			else
+			{
+				$groupes['r'] = explode(',', $params['r']);
+				$groupes['+'] = array_unique(array_merge($groupes['+'], $groupes['r']));
+			}
+		}
 		return $groupes + array_intersect_key($params, array('f' => 1)) + array('f' => 'html');
 	}
 	
@@ -77,11 +89,22 @@ class AffRéseau
 			'-' => array(),
 		);
 		
+		$raf = [];
+		
 		for($i = 0; ++$i < count($args);)
 		{
 			switch($arg = $args[$i])
 			{
 				case '-f': $groupes['f'] = $args[++$i]; break;
+				case '-R': // Tout rafraîchir.
+					$groupes['r'] = true;
+					break;
+				case '-r': // Rafraîchir la première entrée.
+					if(!isset($args[$i + 1]) || in_array(substr($args[$i + 1], 0, 1), [ '-', '=', '' ]))
+						throw new Exception('L\'option -r ("rafraîchir") doit être suivie du numéro du nœud à rafraîchir');
+					$raf[] = $args[$i + 1];
+					// Mais pas de ++$i, car l'entrée à rafraîchir dans une premier temps est aussi à parcourir (donc à passer dans le default).
+					break;
 				default:
 					switch(substr($arg, 0, 1))
 					{
@@ -93,6 +116,9 @@ class AffRéseau
 					break;
 			}
 		}
+		
+		if(!empty($raf) && !isset($groupes['r']))
+			$groupes['r'] = $raf;
 		
 		return $groupes + array('f' => 'dot');
 	}
@@ -117,6 +143,14 @@ class AffRéseau
 		if($mode & self::SOURCE)
 		{
 			$paramsRaf = $params + [ '+' => [], '-' => [], '=' => [] ];
+			// Veut-on rafraîchir l'intégralité du graphe ou seulement certains nœuds précis?
+			// Auquel cas on remplace la liste des '+'.
+			if($mode & self::CACHE && isset($params['r'])) // Si l'on passe par le cache (car si l'on est branchés en direct sur les sources, il nous faut de toute façon tout ramener: on n'aura pas le cache pour reconstituer les entrées non récupérées de la source).
+			{
+				$r = $params['r'];
+				if(is_array($r) || (is_string($r) && $r = [ $r ]))
+					$paramsRaf = [ '+' => $r ] + $params;
+			}
 			
 			require_once R.'/app/import/Source.php';
 			
