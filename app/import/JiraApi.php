@@ -88,6 +88,7 @@ class JiraApi
 	{
 		$p = new Parcours($this);
 		
+		if(defined('STDERR'))
 		$this->_aff = new AffT(STDERR);
 		
 		$this->_sortie->début();
@@ -98,6 +99,7 @@ class JiraApi
 		
 		$this->_sortie->fin();
 		
+		if(isset($this->_aff))
 		$this->_aff->affl(null, '');
 	}
 	
@@ -247,6 +249,8 @@ class JiraApi
 	
 	protected function _aff($num, $rés = null, $détail = null)
 	{
+		if(!isset($this->_aff)) return;
+		
 		if($détail === null && $rés)
 		{
 			$détail = $rés;
