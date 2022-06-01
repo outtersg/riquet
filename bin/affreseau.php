@@ -81,6 +81,7 @@ class AffRéseau
 		{
 			switch($arg = $args[$i])
 			{
+				case '-f': $groupes['f'] = $args[++$i]; break;
 				default:
 					switch(substr($arg, 0, 1))
 					{
