@@ -126,7 +126,7 @@
 			aff: function(message)
 			{
 				var ducalme = document.getElementById('ducalme');
-				ducalme.querySelector('span').childNodes[0].nodeValue = message;
+				ducalme.querySelector('span').innerHTML = message;
 				ducalme.setAttribute('class', 'aff');
 			},
 			fini: function()
