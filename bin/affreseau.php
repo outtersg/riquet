@@ -191,10 +191,15 @@ class AffRéseau
 		{
 			case 'html':
 			case 'dot':
+				$dots = [];
+				if(isset($ns[0]) && count($ns[0]))
+				{
 				require_once R.'/app/export/Dot.php';
 				$ce = $this->app->classe('ExportDot');
 				$this->dot = $e = new $ce();
+					$dots[] =
 				$dot = $e->exporter($ns[0], $ns[1]);
+				}
 				break;
 		}
 		
