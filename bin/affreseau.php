@@ -96,10 +96,36 @@ class AffRéseau
 		return $groupes + array('f' => 'dot');
 	}
 	
+	const CACHE = 0x1;
+	const SOURCE = 0x2;
+	
 	protected function _nœudsEtLiens($params)
 	{
+		// 3 modes:
+		// - 0 depuis le cache
+		// - 1 depuis le serveur source directement
+		// - 2 depuis le serveur source poussé vers le cache, puis depuis le cache (rafraîchissement de base)
+		// À FAIRE: être multi-sources. Noter que le mode 1 sera alors un peu compliqué s'il s'agit de combiner en mémoire le travail de plusieurs sources: n'est pas SQL qui veut.
+		
+		$mode = self::CACHE;
+		if(isset($params['r'])) // Rafraîchir?
+			$mode |= self::SOURCE;
+		
 		if(!count($params['+'])) return [];
 		
+		if($mode & self::SOURCE)
+		{
+			$paramsRaf = $params + [ '+' => [], '-' => [], '=' => [] ];
+			
+			require_once R.'/app/import/Source.php';
+			
+			$cs = $this->app->classe('Source');
+			$s = new $cs($this->app);
+			$s->import->faire($paramsRaf['+'], 5, $paramsRaf['-'], $paramsRaf['=']);
+		}
+		
+		if($mode & self::CACHE)
+		{
 		require_once R.'/app/ChargeurBdd.php';
 		require_once R.'/app/Parcours.php';
 		
@@ -110,6 +136,7 @@ class AffRéseau
 		$p = new $cp($c);
 
 		$ns = $p->parcourir($params['+'], $params['-'], $params['=']);
+		}
 		
 		return [ $ns ];
 	}
