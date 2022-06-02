@@ -152,8 +152,15 @@
 			clic: function(e)
 			{
 				e.preventDefault();
-				var dest = e.target.closest('a').getAttribute('href');
+				var lien = e.target.closest('a');
+				var dest = lien.getAttribute('href');
 				window.history.pushState({ url: document.URL }, '', dest);
+				// Certains paramètres techniques, valables pour la page entière, n'ont plus sens, ou doivent être adaptés, pour un chargement incrémental en AJAX:
+				var suff = '';
+				if(/[?&]r([=&]|$)/.test(dest) && lien.hasAttribute('data-cible')) // Si la page principale était demandée avec rafraîchissement, les déploiements unitaires doivent l'être aussi.
+					suff += '&r='+lien.getAttribute('data-cible');
+				dest = dest.replace(/(&|$)/g, '\u001c$1').replace('?', '?&').replace(/&(r)(=[^&]*)?\u001c/g, '').replace(/\u001c/g, '').replace('?&', '?');
+				dest += suff;
 				POM.charger(dest);
 			},
 			outiller: function(e)
@@ -178,6 +185,7 @@
 				for(var i = boutons.length; --i >= 0;)
 					boutons[i].setAttribute('stroke', foncé);
 				POM.pom.querySelector('.plus').setAttribute('href', document.URL+' '+num);
+				POM.pom.querySelector('.plus').setAttribute('data-cible', num);
 				POM.pom.querySelector('.moins').setAttribute('href', document.URL+' ='+num);
 				POM.pom.querySelector('.nenni').setAttribute('href', document.URL+' -'+num);
 			},
