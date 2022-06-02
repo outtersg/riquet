@@ -167,7 +167,12 @@
 			{
 				if(!POM.pom) POM.init();
 				if(!POM.defs.parentElement) POM.svg.appendChild(POM.defs); // Suite à un clic().
-				if(!e) { delete POM.pointe; POM.pom.setAttribute('class', ''); return; }
+				if(!e)
+				{
+					delete POM.pointe;
+					POM.pom.setAttribute('class', '');
+					return;
+				}
 				if(e == POM.pointe) return;
 				POM.pointe = e;
 				
