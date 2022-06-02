@@ -238,7 +238,7 @@
 			},
 			_reçu: function(r)
 			{
-				DuCalme.fini();
+				window.setTimeout(DuCalme.fini, 200); // Si un dialogue montrait une barre de progression, on la laisse affichée une petite seconde sur le "100 %".
 				dots[dotIndex = dots.length] = [ r ];
 				render();
 			},
