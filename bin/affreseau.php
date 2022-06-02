@@ -159,6 +159,7 @@ class AffRéseau
 		if(!count($params['+'])) return [];
 		
 		if($mode & self::SOURCE)
+			try
 		{
 			$paramsRaf = $params + [ '+' => [], '-' => [], '=' => [] ];
 			// Veut-on rafraîchir l'intégralité du graphe ou seulement certains nœuds précis?
@@ -182,6 +183,7 @@ class AffRéseau
 			if(!($mode & self::CACHE))
 				$ns = $s->persisteur->mém();
 		}
+			catch(Exception $ex) {} // Pas grave si on a le cache derrière.
 		
 		if($mode & self::CACHE)
 		{
