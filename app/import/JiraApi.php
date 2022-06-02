@@ -290,6 +290,7 @@ class JiraApi
 			CURLOPT_USERPWD => $this->_idMdp,
 			CURLOPT_HTTPHEADER => $enTêtes,
 			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_TIMEOUT => 15,
 		];
 		if($params)
 			$o[CURLOPT_POSTFIELDS] = $params;
