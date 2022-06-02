@@ -135,7 +135,7 @@ class AffRéseau
 			$this->_faits = $this->_àFaire = [];
 		}
 		
-		if(!$rés)
+		if($rés === null)
 			$this->_àFaire[$num] = 1;
 		else
 			$this->_faits[$num] = 1;
