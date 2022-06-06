@@ -389,6 +389,7 @@
 
 var dotIndex = 0;
 var graphviz = d3.select("#graph").graphviz()
+	.scale(0.5) // Trop gros par défaut.
 	.tweenShapes(false).tweenPaths(false)
 	.logEvents(true)
 	.on("initEnd", render);
