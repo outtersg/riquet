@@ -171,6 +171,7 @@
 				{
 					delete POM.pointe;
 					POM.pom.setAttribute('class', '');
+					if(POM.pom.parentElement)
 					POM.pom.parentElement.removeChild(POM.pom);
 					return;
 				}
