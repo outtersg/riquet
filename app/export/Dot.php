@@ -78,6 +78,14 @@ class ExportDot
 					if(!($attrs = $this->propsLien($type, $poids))) $attrs = [];
 					if(($écartLien = $this->écartLien($type, $source, $cible, $nœuds)) > 1)
 						$attrs = [ 'minlen' => $écartLien ] + $attrs;
+					if($this->nœudSuranné($nœuds[$source]) || $this->nœudSuranné($nœuds[$cible]))
+					{
+						$transp = '#0000004d';
+						if(isset($attrs['color']))
+							$attrs['color'] = preg_replace('/#[0-9a-fA-F]{6,8}|[a-zA-Z0-9]+/', $transp, $attrs['color']);
+						else
+							$attrs['color'] = $transp;
+					}
 					$affl[] = $idSource.' -> '.$idCible.' '.$this->style($attrs);
 				}
 		}
@@ -210,6 +218,11 @@ class ExportDot
 	{
 		if(isset(static::$Flèches[$type]))
 			return static::$Flèches[$type];
+	}
+	
+	public function nœudSuranné($nœud)
+	{
+		return false;
 	}
 	
 	protected function écartLien($type, $a, $b, $nœuds)
