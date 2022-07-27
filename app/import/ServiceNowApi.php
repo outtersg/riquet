@@ -17,6 +17,11 @@ class ServiceNowApi
 		
 		$this->_cache = $cache;
 		$this->_auth = null;
+		$this->_configAuth =
+		[
+			'pageVérif' => $this->_racine.'/navpage.do',
+			'exprVérif' => "/NOW.user.name = '(.*)'/",
+		];
 	}
 	
 	public function tout()
@@ -51,14 +56,15 @@ class ServiceNowApi
 		
 		//$n->aller($this->_racine.$urlDeDéconnexionSSO);
 		// A-t-on une redirection type SSO?
-		$suite = $n->allerEtTrouver($this->_racine, null, 'redirection', "/(?:top.location.href *= *|top.location.replace *\()'([^']*)'/");
+		$urlConnexion = isset($this->_configAuth['urlConnexion']) ? $this->_configAuth['urlConnexion'] : $this->_racine.'/';
+		$suite = $this->_n->allerEtTrouver($urlConnexion, null, 'redirection', "/(?:.location.href *= *|.location.replace *\()['\"]([^'\"]*)['\"]/");
 		$lard = null; // Le paquet de viandasse qu'on devra pousser à la page cible pour lui signifier par exemple le jeton du SSO.
 		if($suite)
 		{
 		$pAuth = $n->aller($suite, null);
 		
 		// Soit on est redirigé vers la mire d'authentification, soit on était déjà en session et on ne fait que suivre.
-		$eSamlr = "/SAMLResponse[^>]* value='([^']*)'/";
+		$eSamlr = "/SAMLResponse[^>]* value=['\"]([^'\"]*)['\"]/";
 		if(preg_match($eSamlr, $pAuth, $samlr))
 			$samlr = $samlr[1];
 		else if(preg_match('/name="execution"[^>]*value="([^"]*)"/', $pAuth, $execu))
@@ -107,7 +113,7 @@ class ServiceNowApi
 				throw new Exception("Erreur d'authentification: ".$mess);
 			}
 		}
-		$page = $n->allerEtTrouver($this->_racine.'/navpage.do', $lard, 'moi', "/NOW.user.name = '(.*)'/");
+		$page = $n->allerEtTrouver($this->_configAuth['pageVérif'], $lard, 'moi', $this->_configAuth['exprVérif']);
 		if(!$page)
 			throw new Exception("Authentification échouée, impossible de retrouver notre nom dans la page.");
 		else
@@ -136,6 +142,7 @@ class ServiceNowApi
 			$r == ''
 			|| strpos($r, 'invalid token') !== false
 			|| strpos($r, '<script>window.top.location.replace(') !== false
+			|| preg_match("#onload *=.*window.location.href *= *['\"]#", $r) !== false
 		;
 		if($err && $tenterAuth && !isset($this->_auth))
 		{
