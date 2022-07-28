@@ -149,7 +149,7 @@ class ServiceNowApi
 			$r == ''
 			|| strpos($r, 'invalid token') !== false
 			|| strpos($r, '<script>window.top.location.replace(') !== false
-			|| preg_match("#onload *=.*window.location.href *= *['\"]#", $r) !== false
+			|| preg_match("#onload *=.*window.location.href *= *['\"]#", $r)
 		;
 		if($err && $tenterAuth && !isset($this->_auth))
 		{
