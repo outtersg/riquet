@@ -46,7 +46,7 @@ class ServiceNowApi
 	const INTERNE = 'interne';
 	const SSO = 'SSO';
 	
-	public function auth()
+	public function auth($page = null)
 	{
 		/* À FAIRE: cette authentification est spécifique à un SSO par CAS. Généraliser. */
 		
@@ -54,10 +54,17 @@ class ServiceNowApi
 		
 		$n = $this->_n;
 		
+		$expRedir = "/(?:.location.href *= *|.location.replace *\()['\"]([^'\"]*)['\"]/"; // On repose sur la présence d'une redirection JS, nous attendant à ce que la page ait une telle formule "on load".
+		
+		// Si l'auth est appelée depuis une page qui, sans session d'ouverte, a déjà entamé la séquence d'authentification, on reprend où on détecte qu'il en est.
+		// Sinon on provoquera un accès à page pour récupérer les infos dont on a besoin.
+		if(!($page && preg_match($expRedir, $page, $réponses, 0) && ($suite = $réponses[1])))
+		{
 		//$n->aller($this->_racine.$urlDeDéconnexionSSO);
 		// A-t-on une redirection type SSO?
 		$urlConnexion = isset($this->_configAuth['urlConnexion']) ? $this->_configAuth['urlConnexion'] : $this->_racine.'/';
-		$suite = $this->_n->allerEtTrouver($urlConnexion, null, 'redirection', "/(?:.location.href *= *|.location.replace *\()['\"]([^'\"]*)['\"]/");
+			$suite = $this->_n->allerEtTrouver($urlConnexion, null, 'redirection', $expRedir);
+		}
 		$lard = null; // Le paquet de viandasse qu'on devra pousser à la page cible pour lui signifier par exemple le jeton du SSO.
 		if($suite)
 		{
@@ -146,7 +153,7 @@ class ServiceNowApi
 		;
 		if($err && $tenterAuth && !isset($this->_auth))
 		{
-			$this->auth();
+			$this->auth($r);
 			$r = $this->aller($url, $formu, false);
 		}
 		return $r;
