@@ -321,6 +321,13 @@
 				
 				var dim = Impr.dim(format); // À FAIRE: peut-on suggérer à l'impression le format de papier à utiliser?
 				var échelle = 0.5; // Graphviz nous sort des trucs bien trop gros.
+				/* NOTE: remise à zéro de la remise en page utilisateur
+				 * Si l'internaute s'est amusé à agrandir / déplacer l'image, il est très difficile de réinitialiser son positionnement / grossissement (pour que l'impression soit déterministe).
+				 * En effet Graphviz ne commence pas à 0,0 (ex.: translate(4,4684) scale(1) pour une image dont le getBoundingClientRect() fait 2174,3128);
+				 * et l'agrandissement joue sur la translation pour que le coin reste en place (ex.: translate(70,2398) scale(0.5) pour 1091,1569).
+				 * Il nous faudrait idéalement savoir jouer sur Graphviz pilotant son SVG, à défaut récupérer les valeurs de départ et les mémoriser.
+				 */
+				var échelleRendu = parseFloat(graphviz.options().scale); // La proportion dans laquelle le moteur Graphviz génère par rapport à ses dimensions par défaut.
 				var marge = 1.0; // En centimètres; pour simplifier, marge et chevauchement sont considérés identiques.
 				var chevauchement = marge;
 				
@@ -338,8 +345,8 @@
 				var t = g.getBoundingClientRect(); // Taille du SVG.
 				var dx, dy;
 				// Sur chaque feuille, on perd les deux marges + le chevauchement avec la feuille suivante; sauf la dernière feuille qui n'est chevauchée par personne, donc retirons cette marge de la taille de l'image pour savoir combien de feuilles seront nécessaires.
-				var nl = Math.ceil((t.width * échelle - chevauchement) / (dx = dim.l - 2 * marge - chevauchement));
-				var nh = Math.ceil((t.height * échelle - chevauchement) / (dy = dim.h - 2 * marge - chevauchement));
+				var nl = Math.ceil((t.width * échelle / échelleRendu - chevauchement) / (dx = dim.l - 2 * marge - chevauchement));
+				var nh = Math.ceil((t.height * échelle / échelleRendu - chevauchement) / (dy = dim.h - 2 * marge - chevauchement));
 				
 				/*- Au boulot! -*/
 				
