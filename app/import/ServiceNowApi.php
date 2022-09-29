@@ -140,9 +140,30 @@ class ServiceNowApi
 	
 	public function aller($url, $formu = null, $tenterAuth = true)
 	{
+		$enTêtes = [];
+		$urlBrute = $url;
+		if(is_array($url))
+		{
+			$trucs = $url;
+			unset($url);
+			foreach($trucs as $clé => $truc)
+				// À FAIRE: si clé alpha, en-tête supplémentaire.
+				switch($truc)
+				{
+					case 'JSON':
+						$enTêtes['Accept'] = 'application/json;charset=utf-8';
+						$enTêtes['Content-Type'] = 'application/json';
+						if(is_array($formu) || is_object($formu))
+							$formu = json_encode($formu);
+						break;
+					default:
+						$url = $truc;
+				}
+		}
 		if(substr($url, 0, 1) == '/')
 			$url = $this->_racine.$url;
-		$enTêtes = isset($this->_n->jeton) ? array('X-UserToken' => $this->_n->jeton) : null;
+		if(isset($this->_n->jeton))
+			$enTêtes['X-UserToken'] = $this->_n->jeton;
 		
 		$r = $this->_n->obtenir($url, $formu, true, $enTêtes);
 		$err = // Selon que l'on tape une ressource HTML ou XML.
@@ -154,7 +175,7 @@ class ServiceNowApi
 		if($err && $tenterAuth && !isset($this->_auth))
 		{
 			$this->auth($r);
-			$r = $this->aller($url, $formu, false);
+			$r = $this->aller($urlBrute, $formu, false);
 		}
 		return $r;
 	}
