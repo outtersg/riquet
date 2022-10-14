@@ -13,8 +13,8 @@ analyserParametres()
 	do
 		case "$1" in
 			-t) cols="$cols||' '||f.nom" ;;
-			/) where="f.desc regexp '$2' or f.comm regexp '$2'" ; shift ;;
-			/*) where="f.desc regexp '$1' or f.comm regexp '$1'" ; shift ;;
+			/) where="f.nom regexp '$2' or f.desc regexp '$2' or f.comm regexp '$2'" ; shift ;;
+			/*) where="f.nom regexp '$1' or f.desc regexp '$1' or f.comm regexp '$1'" ; shift ;;
 			*) where="f.num in ('`echo "$*" | sed -e "s/ /','/g"`')" ;;
 		esac
 		shift
