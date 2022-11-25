@@ -14,7 +14,7 @@ _actu()
 	
 	titre "[[[ IMPORT SERVICENOW ]]]"
 	
-	local suf= opttelech= temp=1 comm=
+	local suf= opttelech= temp=1 comm=1
 	
 	while [ $# -gt 0 ]
 	do
@@ -23,8 +23,8 @@ _actu()
 				opttelech="$opttelech --init"
 				temp=
 				;;
-			--comm)
-				comm=1
+			--sans-commentaire)
+				comm=
 				;;
 		esac
 		shift
