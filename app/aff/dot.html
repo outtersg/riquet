@@ -290,6 +290,19 @@
 				DuCalme.aff('Préparation de l\'impression…');
 				if(!format) format = 'A3h';
 				
+				if(!Impr.css)
+				{
+					Impr.css = document.createElement('style');
+					Impr.css.setAttribute('type', 'text/css');
+					document.head.appendChild(Impr.css);
+				}
+				var f;
+				if((f = Impr.formats.exec(format)))
+				{
+					var orient = f[2] == 'h' ? 'landscape' : 'portrait';
+					Impr.css.innerText = '@media print { @page { size: A'+f[1]+' '+orient+'; margin: 0; } }';
+				}
+				
 				window.setTimeout(function()
 				{
 				// Firefox (au moins) a un souci: le SVG créé dans l'onbeforeprint n'est pas encore rendu sur l'aperçu d'impression, ce qui donne une page blanche.
