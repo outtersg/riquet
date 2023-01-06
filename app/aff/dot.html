@@ -265,6 +265,7 @@
 		
 		var Impr =
 		{
+			formats: /^A([0-5])([hvp]?)$/,
 			init: function()
 			{
 				// Cf. note dans imprimer().
@@ -287,6 +288,8 @@
 			{
 				// À FAIRE: compenser le zoom.
 				DuCalme.aff('Préparation de l\'impression…');
+				if(!format) format = 'A3h';
+				
 				window.setTimeout(function()
 				{
 				// Firefox (au moins) a un souci: le SVG créé dans l'onbeforeprint n'est pas encore rendu sur l'aperçu d'impression, ce qui donne une page blanche.
@@ -300,7 +303,7 @@
 			dim: function(format)
 			{
 				var f;
-				if((f = /^A([0-5])([hvp]?)$/.exec(format)))
+				if((f = Impr.formats.exec(format)))
 				{
 					var rac2 = Math.sqrt(2);
 					var grand = Math.sqrt(rac2) * 100.0; // Feuilles Ax: le grand côté fait √2 le petit, et la surface de l'A0 est d'1m2.
@@ -315,8 +318,6 @@
 			},
 			avant: function(format)
 			{
-				if(!format) format = 'A3h';
-				
 				/*- Dimensions -*/
 				
 				var dim = Impr.dim(format); // À FAIRE: peut-on suggérer à l'impression le format de papier à utiliser?
