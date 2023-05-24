@@ -115,7 +115,6 @@ class Parcours
 	public function reçu($nouveaux)
 	{
 		$plus = $this->_params['+'];
-		$moins = $this->_params['-'];
 		$plaf = $this->_params['plaf'];
 		
 		$nouveauxLiens = $this->chargeur->chargerLiens($nouveaux);
@@ -135,12 +134,10 @@ class Parcours
 			foreach($listesDeNouveauxLiens as $nouveauxLiens)
 			foreach($nouveauxLiens as $lType => $ls1)
 			{
-				$ls1 = array_diff_key($ls1, $moins);
+				$ls1 = $this->_passants($ls1);
 				foreach($ls1 as $lDe => $ls2)
 				{
-					if(isset($this->_params['vus'])) $this->_params['vus'] += $ls2;
-
-					$ls2 = array_diff_key($ls2, $moins);
+					$ls2 = $this->_passants($ls2);
 					if(count($ls2))
 					{
 					isset($this->liens[$lType][$lDe]) || $this->liens[$lType][$lDe] = array();
@@ -180,6 +177,24 @@ class Parcours
 		$this->faits += $nouveaux;
 		$this->àFaire = $àFaire;
 		return $nouveaux;
+	}
+	
+	/**
+	 * Voit passer les prochains nœuds à traiter, écarte ceux exclus explicitement, mémorise ceux aperçus.
+	 */
+	protected function _passants($liste)
+	{
+		if(isset($this->_params['vus'])) $this->_params['vus'] += $liste;
+		
+		if(isset($this->_params['-']))
+		{
+			$moins = $this->_params['-'];
+			// Un - qu'on a vu est estimé déjà parcouru.
+			if(isset($this->_params['parcourus'])) $this->_params['parcourus'] += array_intersect_key($moins, $liste);
+			$liste = array_diff_key($liste, $moins);
+		}
+	
+		return $liste;
 	}
 }
 
