@@ -106,6 +106,14 @@ class JiraApi
 		
 		if(isset($this->_aff))
 		$this->_aff->affl(null, '');
+		
+		// Diagnostic sur les possibilités de simplifier la liste d'entrées à écarter.
+		if(isset($this->_aff) && !empty($p->_params['parcourus']) && !empty($p->_params['-']))
+		{
+			$inutiles = array_diff_key($p->_params['-'], $p->_params['parcourus']);
+			if(count($inutiles))
+				fprintf(STDERR, "# Les entrées suivantes non rencontrées, il n'est pas nécessaire de les écarter explicitement:\n#\t%s\n", implode(', ', array_keys($inutiles)));
+		}
 	}
 	
 	public function ignorerLié($lien)
