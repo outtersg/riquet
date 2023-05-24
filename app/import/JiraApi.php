@@ -208,6 +208,7 @@ class JiraApi
 	{
 		// Poussage!
 		
+		if($this->_sortie)
 		$this->_sortie->pousserFiche($j);
 		
 		if($async)
