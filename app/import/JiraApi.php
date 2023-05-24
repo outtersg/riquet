@@ -58,23 +58,27 @@ class JiraApi
 	
 	public function lancer($params)
 	{
-		$àFaire = $plus = $moins = array();
-		$plaf = 5; // Plafond. Si trop de liens on ne suit pas.
+		$boulot = [ '-' => [], '+' => [], '=' => [] ];
+		$plaf = 5; // Plafond. Si trop de liens on ne suit pas
 		
 		for($i = 0; ++$i < count($params);)
 			switch($param = $params[$i])
 			{
 				default:
-					switch(substr($param, 0, 1))
+					switch($mode = substr($param, 0, 1))
 					{
-						case '-': $moins[substr($param, 1)] = 1; break;
-						case '+': $plus[substr($param, 1)] = 1; break;
-						case '=': $bofs[substr($param, 1)] = 1; break;
-						default: $àFaire[] = $param; break;
+						case '-':
+						case '+':
+						case '=':
+							$boulot[$mode][substr($param, 1)] = 1;
+							break;
+						default:
+							$boulot['+'][$param] = 1;
+							break;
 					}
 			}
 		
-		$this->faire($àFaire, $plaf, $moins, $plus);
+		$this->faire(array_keys($boulot['+'] + $boulot['=']), $plaf, array_keys($boulot['-']), array_keys($boulot['+']));
 	}
 	
 	/**
