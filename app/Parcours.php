@@ -79,6 +79,8 @@ class Parcours
 			'-' => $moins,
 			'plaf' => $plaf,
 			'notif' => method_exists($this->chargeur, 'notifRetenu'),
+			'vus' => [],
+			'parcourus' => [],
 		];
 		
 		$fusible = 0;
@@ -122,6 +124,7 @@ class Parcours
 		// car reste une vérif à faire plus bas, savoir si on veut les entreposer complets (intéressants dans notre résultat) ou null (à écarter).
 		/* À FAIRE: $moins pourrait être une simple entrée [ id: null ] dans $this->faits, comme ça on évite d'arry_diff_key deux fois, une avoir $moins, une avec $this->faits. */
 		$this->enCours = array_diff_key($this->enCours, $nouveaux);
+		if(isset($this->_params['parcourus'])) $this->_params['parcourus'] += array_fill_keys(array_keys($nouveaux), 1);
 		
 			// $nouveauxLiens doit avoir pour indices de premier niveau le type de lien. Si c'est un "bête" tableau (indices numériques), c'est sans doute un agrégat de tableaux retour indépendants (à combiner).
 			$listesDeNouveauxLiens = isset($nouveauxLiens[0]) ? $nouveauxLiens : [ $nouveauxLiens ];
@@ -135,6 +138,8 @@ class Parcours
 				$ls1 = array_diff_key($ls1, $moins);
 				foreach($ls1 as $lDe => $ls2)
 				{
+					if(isset($this->_params['vus'])) $this->_params['vus'] += $ls2;
+
 					$ls2 = array_diff_key($ls2, $moins);
 					if(count($ls2))
 					{
