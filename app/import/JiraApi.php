@@ -247,7 +247,7 @@ class JiraApi
 		{
 			case Parcours::GROS:
 				$bien = self::BOF;
-				$cr .= ' [33m(trop de liens)[0m';
+				$cr .= ' ['.self::$Couls[self::BOF].'m(trop de liens)[0m';
 				break;
 			case Parcours::FORCÉ:
 				$cr .= ' ['.self::$Couls[self::BONDACC].'m(trop de liens mais forcé)[0m';
