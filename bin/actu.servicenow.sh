@@ -40,8 +40,22 @@ _actu()
 	titre "Conversion CSV -> SQL"
 	[ -n "$temp" ] || rm -f "$BDD" # /!\ On bute la base en mode --init. Pas sympa si d'autres sources que nous ont alimenté. # À FAIRE: un simple delete de tout ce qui est à nous.
 	php "$SCRIPTS/../app/maj.php"
-	php "$SCRIPTS/servicenowactu.php" "$csv" > "$sql"
-	[ -z "$comm" ] || php "$SCRIPTS/servicenowactu.php" "$csv.comm" >> "$sql"
+	{
+		# https://blog.devart.com/increasing-sqlite-performance.html
+		# https://phiresky.github.io/blog/2020/sqlite-performance-tuning/
+		cat <<TERMINE
+pragma journal_mode = truncate;
+pragma locking_mode = exclusive;
+begin;
+TERMINE
+		php "$SCRIPTS/servicenowactu.php" "$csv"
+		[ -z "$comm" ] || php "$SCRIPTS/servicenowactu.php" "$csv.comm"
+		cat <<TERMINE
+commit;
+pragma vacuum;
+pragma optimize;
+TERMINE
+	} > "$sql"
 	
 	titre "Intégration des ServiceNow à la base"
 	time sqlite3 "$BDD" < "$sql"
