@@ -77,8 +77,11 @@ class Liens
 		if(!empty($nums))
 			$where[] = "f.num in ('".implode("','", $nums)."')";
 		if(!empty($textes))
+		{
 			foreach($textes as $texte)
 				$where[] = "f.nom regexp '$texte' or f.desc regexp '$texte' or f.comm regexp '$texte'";
+			$where[] = "f.oid in (select lautre.a from f autre, l lautre where autre.nom in ('".implode("','", $textes)."') and lautre.b = autre.oid)";
+		}
 		if(empty($where)) return;
 		$where = implode(' or ', $where);
 		
