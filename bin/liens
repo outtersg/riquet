@@ -8,11 +8,12 @@ BDD="$VAR/riquet.sqlite3"
 
 analyserParametres()
 {
-	where= cols=
+	where= cols= liens=
 	while [ $# -gt 0 ]
 	do
 		case "$1" in
 			-t) cols="$cols||' '||f.nom" ;;
+			-l) liens="lautre.t in ('`echo "$2" | sed -e "s/,/','/g"`')" ; shift ;;
 			/) where="f.nom regexp '$2' or f.desc regexp '$2' or f.comm regexp '$2'" ; shift ;;
 			/*) where="f.nom regexp '$1' or f.desc regexp '$1' or f.comm regexp '$1'" ; shift ;;
 			*) where="f.num in ('`echo "$*" | sed -e "s/ /','/g"`')" ;;
@@ -31,6 +32,13 @@ analyserParametres()
 		metatf="||case when l.b is null then '' else '-' end"
 		etats="left join (l join f e on e.id = l.b and e.nom in (`param --sql terminaux`)) on l.a = f.id and l.t = 'E'"
 	fi
+	
+	case "$liens" in
+		?*)
+			cols="$cols||coalesce(' [33m['||liens.liste||'][0m', '')"
+			etats="$etats left join (select lautre.a id, group_concat(autre.nom, ', ') liste from l lautre join n autre on autre.id = lautre.b where $liens group by lautre.a) liens on liens.id = f.id"
+			;;
+	esac
 }
 
 param()
