@@ -88,15 +88,17 @@ delete from leq where (did, rid, dest, sens, t) in (select did, rid, dest, sens,
 delete from leq where (did, rid, dest, sens, t) in (select did, rid, dest1, sens, t from lidem);
 drop table lidem;
 
-with n as (select distinct did from leq)
+with n as (select distinct did from leq where source < 0)
 select count(1) n, 'nœuds ne peuvent être supprimés car leur remplaçant porte moins d''infos' from n;
-select 'Ex.:';
+select 'Ex. (les source = -1 sans source 1 équivalent):';
+.head on
 select *
 from leq, f dest
 where dest.id = leq.dest
 order by leq.did limit 20;
+.head off
 
-delete from no where id in (select did from leq);
+delete from no where id in (select did from leq where source < 0);
 select count(1) n, 'nœuds orphelins à supprimer' from no;
 
 delete from n where id in (select id from no);
