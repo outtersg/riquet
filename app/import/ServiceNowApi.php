@@ -39,7 +39,7 @@ class ServiceNowApi
 		$nJours = 7;
 		$this->filtre[] = 'sys_updated_on';
 		$this->filtre[] = '>=';
-		$this->filtre[] = strftime('%FT%T', time() - 3600 * 24 * $nJours);
+		$this->filtre[] = substr(date('c', time() - 3600 * 24 * $nJours), 0, 19);
 		return $this->tout();
 	}
 	
@@ -236,6 +236,14 @@ class ServiceNowApi
 		
 		return isset($concat) ? implode($concat, $f) : $f;
 	}
+	
+	public $mode;
+	public $filtre;
+	protected $_racine;
+	protected $_n;
+	protected $_cache;
+	protected $_auth;
+	protected $_configAuth;
 }
 
 ?>

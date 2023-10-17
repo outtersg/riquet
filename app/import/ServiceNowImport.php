@@ -68,6 +68,7 @@ class ServiceNowImport extends Import
 					
 					$àGarderChamps = $àGarderLiens = array();
 					foreach($colcs as $colc => $rien)
+						if(($cols = $CSVSQL[$colc]) !== null)
 						switch(substr($cols = $CSVSQL[$colc], 0, 1))
 						{
 							case '': break; // Ne fera pas son chemin jusqu'au SQL (en tout cas pas directement, servira sans doute dans _retraiter()).
