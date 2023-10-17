@@ -68,6 +68,8 @@ class Sql
 		
 		return implode(',', array_map($fentrée, $param));
 	}
+	
+	protected $_params;
 }
 
 ?>

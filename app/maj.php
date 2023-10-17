@@ -21,6 +21,8 @@ class MajeurRiquet extends Majeur
 		
 		parent::__construct($silo, array($listeur), array($joueur));
 	}
+	
+	public $app;
 }
 
 $app = new App();

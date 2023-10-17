@@ -40,6 +40,10 @@ class App
 		// À FAIRE: en cas de plusieurs candidats, prendre celui le plus profond dans la hiérarchie.
 		return $ancêtre;
 	}
+	
+	public $config;
+	public $bdd;
+	protected $_classes;
 }
 
 ?>

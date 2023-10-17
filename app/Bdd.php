@@ -42,6 +42,8 @@ class Bdd extends PDO
 			$rés[] = $l;
 		return $rés;
 	}
+	
+	public $sql;
 }
 
 ?>

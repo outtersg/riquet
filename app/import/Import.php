@@ -119,6 +119,8 @@ insert into f ($champ, t) select t.* from t_f t left join f on (f.t = t.t and f.
 		
 		return $v;
 	}
+	
+	public $sql;
 }
 
 ?>
