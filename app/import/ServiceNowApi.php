@@ -77,18 +77,19 @@ class ServiceNowApi
 		else if(preg_match('/name="execution"[^>]*value="([^"]*)"/', $pAuth, $execu))
 		{
 			$idMdp = $this->_idMdp(ServiceNowApi::SSO);
-			$execu = $execu[1];
-			$samlr = $n->allerEtTrouver($n->url(), array
+			
+			preg_match_all('/name="([^"]*)"[^>]*value="([^"]*)"/', $pAuth, $prérempl, PREG_SET_ORDER);
+			$formu = array();
+			foreach($prérempl as $pr)
+				$formu[$pr[1]] = $pr[2];
+			
+			$formu = array
 			(
 				'username' => $idMdp[0],
 				'password' => $idMdp[1],
-				'execution' => $execu,
-				'_eventId' => 'submit',
-				'rememberMe' => 'true',
-				'_rememberMe' => 'on',
-				'geolocation' => '',
-				'submit' => '',
-			), 'SAMLResponse', $eSamlr);
+			) + $formu;
+			
+			$samlr = $n->allerEtTrouver($n->url(), $formu, 'SAMLResponse', $eSamlr);
 			// Retour à la mire d'auth?
 			if(!$samlr && strpos($n->page, 'name="execution"') !== false && preg_match('#<p id="errorMessageContainer"[^>]*>(.*)</p>#Us', $n->page, $rexp))
 			{
