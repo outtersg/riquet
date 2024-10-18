@@ -1,3 +1,15 @@
+-- Un précédent dédoublonnage qui travaillait sur les f sans les n a laissé ces derniers orphelins.
+select 'Dédoublonnage des nœuds:';
+create temp table nd as
+	select n.id, max(fr.id) idr
+	from n join n nr on nr.t = n.t and nr.num = n.num join f fr on fr.id = nr.id
+	where not exists (select 1 from f where f.id = n.id)
+	group by 1;
+select count(1) n, 'nœuds orphelins supprimés au profit d''un avec fiche' from nd;
+update l set a = idr from nd where a = id;
+update l set b = idr from nd where b = id;
+delete from n where id in (select id from nd);
+
 select 'Dédoublonnage des fiches:';
 create temporary table fd as
 	select t, num, nom, id_ext, descr, comm, min(ctime) ctime, max(mtime) mtime, max(dtime) dtime, min(id) idr, group_concat(id, ',') ids, count(1) n
