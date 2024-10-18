@@ -1,3 +1,5 @@
+.bail on
+
 -- Un précédent dédoublonnage qui travaillait sur les f sans les n a laissé ces derniers orphelins.
 select 'Dédoublonnage des nœuds:';
 create temp table nd as
@@ -16,6 +18,7 @@ create temporary table fd as
 	from f
 	group by 1, 2, 3, 4, 5, 6
 	having count(1) > 1;
+select count(distinct nom) n_num, count(1) n_exemplaires from fd;
 
 select '[33m'||t||' '||num||' apparaît en '||count(1)||' exemplaires. Uniformisez les titre / description / commentaire avant de retenter.[0m'
 from fd
@@ -26,7 +29,6 @@ create temporary table fr as
 	select idr, f.id
 	from fd join f on ','||ids||',' like '%,'||f.id||',%'
 	where f.id <> idr;
-select * from fr;
 
 update l set a = idr from fr where a = id;
 update l set b = idr from fr where b = id;
