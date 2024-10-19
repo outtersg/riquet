@@ -20,7 +20,7 @@ class ServiceNowApi
 		$this->_configAuth =
 		[
 			'pageVérif' => $this->_racine.'/navpage.do',
-			'exprVérif' => "/NOW.user.name = '(.*)'/",
+			'exprVérif' => '/(?:fullName\\\\x22:\\\\x22|NOW.user.name = \')([^\'\\\\]*)(?:\\\\x22|\')/',
 		];
 	}
 	
